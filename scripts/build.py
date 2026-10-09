@@ -133,7 +133,11 @@ def package(root):
     ], text=True)
     expected = "Signer #1 certificate SHA-256 digest: " + os.environ["EXPECTED_SIGNER_SHA256"]
     if expected not in certificates:
-        raise RuntimeError("APK was not signed with the permanent Kosher Vela key")
+        raise RuntimeError(
+            "APK was not signed with the permanent Kosher Vela key. "
+            + "Expected public certificate SHA-256: " + os.environ["EXPECTED_SIGNER_SHA256"]
+            + "\nAPK certificate details:\n" + certificates
+        )
     info["signer_sha256"] = os.environ["EXPECTED_SIGNER_SHA256"]
     target = Path("out/assets")
     target.mkdir(parents=True, exist_ok=True)
