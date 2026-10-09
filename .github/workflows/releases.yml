@@ -93,7 +93,7 @@ jobs:
           VELA_KEY_ALIAS: kosher-vela
         run: |
           chmod +x gradlew
-          ./gradlew :app:testReleaseUnitTest --tests app.vela.ui.KosherPolicyTest \
+          ./gradlew :app:testDebugUnitTest --tests app.vela.ui.KosherPolicyTest \
             :app:assembleRelease --no-daemon \
             -PappId=app.vela.kosher \
             "-PappVersionName=$APP_VERSION_NAME" \
