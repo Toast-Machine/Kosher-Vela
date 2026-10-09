@@ -15,7 +15,6 @@ Android application ID: **`app.vela.kosher`**. It installs separately from upstr
 These four settings use immutable state, ignore stored preferences, and ignore attempts to
 change them. Their controls are removed from Places, Privacy, onboarding and settings search.
 The dependent "reviews on tap" and "photos on tap" options are also removed.
-"Wait for popular times" and "Hide adult categories" remain unchanged and configurable.
 
 This enforces the existing upstream switches; it is not a complete content-filtering or
 tamper-proof device-management system. Other upstream features are not silently disabled.
