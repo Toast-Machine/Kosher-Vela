@@ -1,0 +1,200 @@
+--- a/app/src/main/java/app/vela/ui/PlaceContent.kt
++++ b/app/src/main/java/app/vela/ui/PlaceContent.kt
+@@ -1,6 +1,7 @@
+ package app.vela.ui
+ 
+ import android.content.Context
++import androidx.compose.runtime.State
+ import androidx.compose.runtime.mutableStateOf
+ 
+ /**
+@@ -10,19 +11,11 @@
+  * [LiveReviews] / [Traffic], persisted in vela_settings.
+  */
+ object ShowReviews {
+-    val on = mutableStateOf(true)
+-
+-    fun init(context: Context) {
+-        on.value = prefs(context).getBoolean(KEY, true)
+-    }
+-
+-    fun set(context: Context, value: Boolean) {
+-        on.value = value
+-        prefs(context).edit().putBoolean(KEY, value).apply()
+-    }
+-
+-    private fun prefs(c: Context) = c.getSharedPreferences("vela_settings", Context.MODE_PRIVATE)
+-    private const val KEY = "show_reviews"
++    val on: State<Boolean> = object : State<Boolean> { override val value = false }
++
++    fun init(context: Context) = Unit
++
++    fun set(context: Context, value: Boolean) = Unit
+ }
+ 
+ /**
+@@ -31,19 +24,11 @@
+  * request, so this is also the data-saver switch).
+  */
+ object LoadPhotos {
+-    val on = mutableStateOf(true)
+-
+-    fun init(context: Context) {
+-        on.value = prefs(context).getBoolean(KEY, true)
+-    }
+-
+-    fun set(context: Context, value: Boolean) {
+-        on.value = value
+-        prefs(context).edit().putBoolean(KEY, value).apply()
+-    }
+-
+-    private fun prefs(c: Context) = c.getSharedPreferences("vela_settings", Context.MODE_PRIVATE)
+-    private const val KEY = "load_photos"
++    val on: State<Boolean> = object : State<Boolean> { override val value = false }
++
++    fun init(context: Context) = Unit
++
++    fun set(context: Context, value: Boolean) = Unit
+ }
+ 
+ /**
+@@ -102,19 +87,11 @@
+  * reactive holder shape as [ShowReviews] / [LoadPhotos], persisted in vela_settings.
+  */
+ object HideExternalLinks {
+-    val on = mutableStateOf(false)
+-
+-    fun init(context: Context) {
+-        on.value = prefs(context).getBoolean(KEY, false)
+-    }
+-
+-    fun set(context: Context, value: Boolean) {
+-        on.value = value
+-        prefs(context).edit().putBoolean(KEY, value).apply()
+-    }
+-
+-    private fun prefs(c: Context) = c.getSharedPreferences("vela_settings", Context.MODE_PRIVATE)
+-    private const val KEY = "hide_external_links"
++    val on: State<Boolean> = object : State<Boolean> { override val value = true }
++
++    fun init(context: Context) = Unit
++
++    fun set(context: Context, value: Boolean) = Unit
+ }
+ 
+ /** Reviews load only when the user taps "Show reviews" on a place (pref `reviews_on_tap`, off). */
+--- a/app/src/main/java/app/vela/ui/LiveReviews.kt
++++ b/app/src/main/java/app/vela/ui/LiveReviews.kt
+@@ -1,7 +1,7 @@
+ package app.vela.ui
+ 
+ import android.content.Context
+-import androidx.compose.runtime.mutableStateOf
++import androidx.compose.runtime.State
+ 
+ /**
+  * Whether the place sheet's Reviews tab shows **Google's own live reviews panel** in a visible
+@@ -11,17 +11,9 @@
+  * scrape in Settings if Google's markup shifts under the CSS surgery.
+  */
+ object LiveReviews {
+-    val on = mutableStateOf(true)
++    val on: State<Boolean> = object : State<Boolean> { override val value = false }
+ 
+-    fun init(context: Context) {
+-        on.value = prefs(context).getBoolean(KEY, true)
+-    }
++    fun init(context: Context) = Unit
+ 
+-    fun set(context: Context, value: Boolean) {
+-        on.value = value
+-        prefs(context).edit().putBoolean(KEY, value).apply()
+-    }
+-
+-    private fun prefs(c: Context) = c.getSharedPreferences("vela_settings", Context.MODE_PRIVATE)
+-    private const val KEY = "live_reviews_panel"
++    fun set(context: Context, value: Boolean) = Unit
+ }
+--- a/app/src/main/java/app/vela/ui/settings/SettingsHub.kt
++++ b/app/src/main/java/app/vela/ui/settings/SettingsHub.kt
+@@ -317,17 +317,11 @@
+     R.string.settings_show_transit_stops to SettingsSection.PLACES,
+     R.string.settings_poi_icon_size to SettingsSection.PLACES,
+     // Places (place pages)
+-    R.string.settings_show_reviews to SettingsSection.PLACES,
+-    R.string.settings_reviews_on_tap to SettingsSection.PLACES,
+     R.string.settings_nav_north_up to SettingsSection.NAVIGATION,
+     R.string.settings_puck_shape to SettingsSection.NAVIGATION,
+-    R.string.settings_photos_on_tap to SettingsSection.PLACES,
+     R.string.settings_details_retry to SettingsSection.PLACES,
+     R.string.settings_route_traffic_on_tap to SettingsSection.PRIVACY,
+-    R.string.settings_read_all_reviews to SettingsSection.PLACES,
+-    R.string.settings_load_photos to SettingsSection.PLACES,
+     R.string.settings_hide_adult to SettingsSection.PLACES,
+-    R.string.settings_hide_external_links to SettingsSection.PLACES,
+     // Navigation
+     R.string.settings_keep_screen_on to SettingsSection.NAVIGATION,
+     R.string.settings_route_picker to SettingsSection.NAVIGATION,
+--- a/app/src/main/java/app/vela/ui/settings/sections/PlacesSettings.kt
++++ b/app/src/main/java/app/vela/ui/settings/sections/PlacesSettings.kt
+@@ -28,45 +28,6 @@
+         Spacer(Modifier.height(8.dp))
+         SettingsGroup(title = stringResource(R.string.settings_place_pages)) {
+         ToggleRow(
+-            label = stringResource(R.string.settings_show_reviews),
+-            checked = app.vela.ui.ShowReviews.on.value,
+-            onCheckedChange = { app.vela.ui.ShowReviews.set(context, it) },
+-            hint = stringResource(R.string.settings_show_reviews_hint),
+-        )
+-        if (app.vela.ui.ShowReviews.on.value) {
+-            GroupDivider()
+-            ToggleRow(
+-                label = stringResource(R.string.settings_reviews_on_tap),
+-                checked = app.vela.ui.ReviewsOnTap.on.value,
+-                onCheckedChange = { app.vela.ui.ReviewsOnTap.set(context, it) },
+-                hint = stringResource(R.string.settings_reviews_on_tap_hint),
+-            )
+-        }
+-        GroupDivider()
+-        ToggleRow(
+-            label = stringResource(R.string.settings_read_all_reviews),
+-            checked = app.vela.ui.LiveReviews.on.value,
+-            onCheckedChange = { app.vela.ui.LiveReviews.set(context, it) },
+-            hint = stringResource(R.string.settings_read_all_reviews_hint),
+-        )
+-        GroupDivider()
+-        ToggleRow(
+-            label = stringResource(R.string.settings_load_photos),
+-            checked = app.vela.ui.LoadPhotos.on.value,
+-            onCheckedChange = { app.vela.ui.LoadPhotos.set(context, it) },
+-            hint = stringResource(R.string.settings_load_photos_hint),
+-        )
+-        if (app.vela.ui.LoadPhotos.on.value) {
+-            GroupDivider()
+-            ToggleRow(
+-                label = stringResource(R.string.settings_photos_on_tap),
+-                checked = app.vela.ui.PhotosOnTap.on.value,
+-                onCheckedChange = { app.vela.ui.PhotosOnTap.set(context, it) },
+-                hint = stringResource(R.string.settings_photos_on_tap_hint),
+-            )
+-        }
+-        GroupDivider()
+-        ToggleRow(
+             label = stringResource(R.string.settings_details_retry),
+             checked = app.vela.ui.DetailsRetry.on.value,
+             onCheckedChange = { app.vela.ui.DetailsRetry.set(context, it) },
+@@ -79,13 +40,7 @@
+             onCheckedChange = { app.vela.ui.HideAdult.set(context, it) },
+             hint = stringResource(R.string.settings_hide_adult_hint),
+         )
+-        GroupDivider()
+-        ToggleRow(
+-            label = stringResource(R.string.settings_hide_external_links),
+-            checked = app.vela.ui.HideExternalLinks.on.value,
+-            onCheckedChange = { app.vela.ui.HideExternalLinks.set(context, it) },
+-            hint = stringResource(R.string.settings_hide_external_links_hint),
+-        )
++
+         }
+         Spacer(Modifier.height(24.dp))
+     }

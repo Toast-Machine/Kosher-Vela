@@ -1,0 +1,144 @@
+name: Mirror Vela app releases
+
+on:
+  schedule:
+    - cron: '2-57/5 * * * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [upstream-release]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vela-release-sync
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      has_work: ${{ steps.plan.outputs.has_work }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Test release tracking
+        run: python3 -m unittest discover -s tests -v
+      - name: Find all unprocessed app releases
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RETRY_FAILURES: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
+        run: python3 scripts/sync.py plan
+
+  work:
+    needs: plan
+    if: needs.plan.outputs.has_work == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    name: ${{ matrix.kind }} ${{ matrix.tag }}
+    env:
+      RELEASE_JSON: ${{ toJSON(matrix) }}
+    steps:
+      - name: Checkout automation
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Checkout exact upstream source
+        if: matrix.kind == 'build'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: PimpinPumpkin/Vela
+          ref: ${{ matrix.sha }}
+          path: upstream
+          persist-credentials: false
+      - name: Set up Java
+        if: matrix.kind == 'build'
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Android SDK
+        if: matrix.kind == 'build'
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd
+        with:
+          packages: platform-tools
+      - name: Validate Gradle wrapper
+        if: matrix.kind == 'build'
+        uses: gradle/actions/wrapper-validation@0723195856401067f7a2779048b490ace7a47d7c
+      - name: Set up Gradle caching
+        if: matrix.kind == 'build'
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c
+      - name: Apply locked policy and prepare reproducible build inputs
+        if: matrix.kind == 'build'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VELA_KEYSTORE_BASE64: ${{ secrets.VELA_KEYSTORE_BASE64 }}
+          VELA_KEYSTORE_PASSWORD: ${{ secrets.VELA_KEYSTORE_PASSWORD }}
+        run: python3 scripts/build.py prepare
+      - name: Test locked settings and build signed release APK
+        if: matrix.kind == 'build'
+        working-directory: upstream
+        env:
+          VELA_KEYSTORE_PASSWORD: ${{ secrets.VELA_KEYSTORE_PASSWORD }}
+          VELA_KEY_ALIAS: kosher-vela
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:testReleaseUnitTest --tests app.vela.ui.KosherPolicyTest \
+            :app:assembleRelease --no-daemon \
+            -PappId=app.vela.kosher \
+            "-PappVersionName=$APP_VERSION_NAME" \
+            "-PappVersionCode=$APP_VERSION_CODE"
+      - name: Verify APK and archive full patched source
+        if: matrix.kind == 'build'
+        run: python3 scripts/build.py package
+      - name: Publish with the original upstream tag and release status
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/build.py publish
+      - name: Record failure for delayed retry
+        if: failure()
+        run: python3 scripts/sync.py failure
+      - name: Save publication or failure receipt
+        if: always() && hashFiles('out/receipt/*.json') != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: receipt-${{ matrix.id }}
+          path: out/receipt/*.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Remove signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/kosher-vela-release.p12"
+
+  finish:
+    needs: [plan, work]
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Collect successful publication receipts
+        if: needs.plan.outputs.has_work == 'true'
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          pattern: receipt-*
+          path: receipts
+      - name: Record completed releases and keep polling active
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/sync.py finish
