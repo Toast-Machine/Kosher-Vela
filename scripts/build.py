@@ -19,6 +19,19 @@ from sync import DESTINATION, UPSTREAM, current_release, write_json
 PACKAGE = "app.vela.kosher"
 
 
+def verify_signer(certificates, expected):
+    digests = re.findall(
+        r"^(?:Signer #\d+|V[234](?:\.\d+)? Signer):? certificate SHA-256 digest:\s*([0-9a-fA-F]{64})\s*$",
+        certificates, re.M,
+    )
+    if not digests or any(digest.lower() != expected.lower() for digest in digests):
+        raise RuntimeError(
+            "APK was not signed with the permanent Kosher Vela key. "
+            + "Expected public certificate SHA-256: " + expected
+            + "\nAPK certificate details:\n" + certificates
+        )
+
+
 def binary(name):
     android = Path(os.environ.get("ANDROID_HOME") or os.environ["ANDROID_SDK_ROOT"])
     candidates = sorted((android / "build-tools").glob("*/" + name))
@@ -131,13 +144,7 @@ def package(root):
     certificates = subprocess.check_output([
         binary("apksigner"), "verify", "--print-certs", str(apks[0]),
     ], text=True)
-    expected = "Signer #1 certificate SHA-256 digest: " + os.environ["EXPECTED_SIGNER_SHA256"]
-    if expected not in certificates:
-        raise RuntimeError(
-            "APK was not signed with the permanent Kosher Vela key. "
-            + "Expected public certificate SHA-256: " + os.environ["EXPECTED_SIGNER_SHA256"]
-            + "\nAPK certificate details:\n" + certificates
-        )
+    verify_signer(certificates, os.environ["EXPECTED_SIGNER_SHA256"])
     info["signer_sha256"] = os.environ["EXPECTED_SIGNER_SHA256"]
     target = Path("out/assets")
     target.mkdir(parents=True, exist_ok=True)
