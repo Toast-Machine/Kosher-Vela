@@ -98,6 +98,12 @@
       "source_sha": "ce1c9a2a0f9593aa6e6d4de02798911e8b1f6b62",
       "build_fingerprint": "44b4182ff3732aa0d2fb04828c8dcf13849e64a81ea07d7a991e5e7f9bc87347",
       "metadata_fingerprint": "21083916944372dcf7ed3862c6583e74d99dc01601dbb944addd8e566e0d2c81"
+    },
+    "409199840": {
+      "tag": "canary",
+      "source_sha": "ec361d63fc503a1e13294bfb6f5ec7f314b996a0",
+      "build_fingerprint": "ef0e5e4a315fcf0957c879a83e0ae97c9d59728803a98ea3036bb2cb40476c8d",
+      "metadata_fingerprint": "f17a389864eb16d621e70fc135011a5eea35b6569dceb21c76a1bd75bd73839b"
     }
   },
   "failed": {
