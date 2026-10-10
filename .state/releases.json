@@ -82,5 +82,29 @@
       "metadata_fingerprint": "3d13b1c6f39b8671b1c63379f128b763df5daf75665af847c33dd80c92534ee1"
     }
   },
-  "failed": {}
+  "failed": {
+    "408770219": {
+      "id": "408770219",
+      "tag": "canary",
+      "name": "Vela 0.5.2479-canary",
+      "sha": "879f7ae9ef0b91a5a778a81e38407363df66e547",
+      "prerelease": true,
+      "created_at": "2026-10-10T07:19:14Z",
+      "published_at": "2026-10-10T07:29:27Z",
+      "updated_at": "2026-10-10T07:29:27Z",
+      "assets": [
+        {
+          "id": "RA_kwDOS7JZe84lZBQA",
+          "name": "vela-maps-canary.apk",
+          "size": 116429005,
+          "updatedAt": "2026-10-10T07:29:26Z",
+          "downloadUrl": "https://github.com/PimpinPumpkin/Vela/releases/download/canary/vela-maps-canary.apk"
+        }
+      ],
+      "build_fingerprint": "2514ea0714da80ff3ec867e2ffe05dd914d746fe8546822132ea6a541bec6ddf",
+      "metadata_fingerprint": "c803f73965e5fb553bdbc2994906fcb29629aab15aae6314619cca8c3f554872",
+      "kind": "build",
+      "retry_at": "2026-10-10T15:06:33.150674+00:00"
+    }
+  }
 }
