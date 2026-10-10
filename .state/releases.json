@@ -86,6 +86,18 @@
       "source_sha": "69a33b2b4b3aedc4d415ee4975f95aebadda932b",
       "build_fingerprint": "d6f9e2bdae08d2e60b12cac6febf2d9dbe2bbd3153260f20cc350946b6b3b56e",
       "metadata_fingerprint": "fd927b1b78076f7549bb17b8579d5dc35262521ec68a8ed349c2d69e50eac07e"
+    },
+    "409113440": {
+      "tag": "canary",
+      "source_sha": "c7a4d1b01b3c0752e5d46718a4462f30bece1754",
+      "build_fingerprint": "b1da8c6342b23c8759a963cc06ec758405b6783c5f0892d0bbe2de9f4e434622",
+      "metadata_fingerprint": "4a400c9541c30dbf095bf09baa8fc161e15c4d1c99bfe0d32f883849b7e3880e"
+    },
+    "409051564": {
+      "tag": "v0.5.2484",
+      "source_sha": "ce1c9a2a0f9593aa6e6d4de02798911e8b1f6b62",
+      "build_fingerprint": "44b4182ff3732aa0d2fb04828c8dcf13849e64a81ea07d7a991e5e7f9bc87347",
+      "metadata_fingerprint": "21083916944372dcf7ed3862c6583e74d99dc01601dbb944addd8e566e0d2c81"
     }
   },
   "failed": {
