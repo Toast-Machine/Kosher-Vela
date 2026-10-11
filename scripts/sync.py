@@ -155,9 +155,36 @@ def current_release(api, item):
     return release, {**normalized, "build_fingerprint": build, "metadata_fingerprint": metadata}
 
 
+def prune_failures(state, live_ids):
+    failed = state.get("failed", {})
+    stale = [release_id for release_id in failed if release_id not in live_ids]
+    for release_id in stale:
+        del failed[release_id]
+    return len(stale)
+
+
+def plural(count, noun):
+    return f"{count} {noun}" + ("" if count == 1 else "s")
+
+
+def state_commit_message(published, failed, cleared):
+    parts = []
+    if published:
+        parts.append(plural(published, "published release"))
+    if failed:
+        parts.append(plural(failed, "failed build"))
+    if not parts:
+        return f"Clear {plural(cleared, 'stale failure')}"
+    message = "Record " + " and ".join(parts)
+    if cleared:
+        message += f"; clear {plural(cleared, 'stale failure')}"
+    return message
+
+
 def record_completion(api, receipts):
     state, sha = read_remote_state(api)
     previous = json.dumps(state, sort_keys=True)
+    published = failed = 0
     for path in Path(receipts).glob("**/receipt.json"):
         item = json.loads(path.read_text(encoding="utf-8"))
         state.setdefault("failed", {}).pop(item["id"], None)
@@ -166,13 +193,20 @@ def record_completion(api, receipts):
             "build_fingerprint": item["build_fingerprint"],
             "metadata_fingerprint": item["metadata_fingerprint"],
         }
+        published += 1
     for path in Path(receipts).glob("**/failure.json"):
         item = json.loads(path.read_text(encoding="utf-8"))
         state.setdefault("failed", {})[item["id"]] = item
+        failed += 1
+    cleared = 0
+    if state.get("failed"):
+        # Rolling tags like canary get a new release id on every re-cut, so
+        # failures for deleted releases would otherwise never be retried or cleared.
+        cleared = prune_failures(state, {release["id"] for release in list_releases(api)})
     if json.dumps(state, sort_keys=True) != previous:
         content = base64.b64encode((json.dumps(state, indent=2) + "\n").encode()).decode()
         api.request(f"repos/{DESTINATION}/contents/{STATE_PATH}", {
-            "message": "Record successful upstream release builds", "content": content,
+            "message": state_commit_message(published, failed, cleared), "content": content,
             "sha": sha, "branch": "main",
         }, method="PUT")
     upstream_latest = api.request(f"repos/{UPSTREAM}/releases/latest", missing_ok=True)

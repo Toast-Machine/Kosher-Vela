@@ -5,7 +5,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from sync import fingerprints, initial_state, list_releases, pending_releases
+from sync import (fingerprints, initial_state, list_releases, pending_releases, prune_failures,
+                  state_commit_message)
 
 
 def release(number, tag=None):
@@ -81,6 +82,20 @@ class ReleaseTrackingTests(unittest.TestCase):
         edited["sha"] = "f" * 40
         edited["build_fingerprint"], edited["metadata_fingerprint"] = fingerprints(edited)
         self.assertNotIn("1", [entry["id"] for entry in pending_releases([edited], state)])
+
+    def test_failures_for_deleted_releases_are_pruned(self):
+        recut = release(2, "canary")
+        state = initial_state([recut])
+        state["failed"] = {"1": {"tag": "canary"}, "2": {"tag": "canary"}}
+        self.assertEqual(prune_failures(state, {recut["id"]}), 1)
+        self.assertEqual(list(state["failed"]), ["2"])
+
+    def test_state_commit_message_describes_what_changed(self):
+        self.assertEqual(state_commit_message(1, 0, 0), "Record 1 published release")
+        self.assertEqual(state_commit_message(0, 1, 0), "Record 1 failed build")
+        self.assertEqual(state_commit_message(2, 1, 1),
+                         "Record 2 published releases and 1 failed build; clear 1 stale failure")
+        self.assertEqual(state_commit_message(0, 0, 2), "Clear 2 stale failures")
 
     def test_release_listing_visits_every_page_and_filters_data_releases(self):
         class FakeAPI:
