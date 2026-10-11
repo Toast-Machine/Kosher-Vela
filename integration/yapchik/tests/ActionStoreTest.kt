@@ -23,6 +23,40 @@ class ActionStoreTest {
         search, bounds, available, { callback },
     )
 
+    @Test fun menuKeysAreSaveableAndStableAcrossUpdatesAndReordering() {
+        val store = store()
+        val first = entry("First").copy(identity = ActionIdentity(Any(), "First", listOf(Any()), Any()))
+        val second = entry("Second")
+        store.updateOwner(first.identity.owner, ActionOwner(null, true, false, false))
+        store.update(first)
+        store.update(second)
+        val firstKey = store.lazyKey(first.identity)
+        val secondKey = store.lazyKey(second.identity)
+        assertTrue(firstKey as Any is java.io.Serializable)
+        assertNotEquals(firstKey, secondKey)
+        store.update(first.copy(bounds = ActionBounds(0f, 80f, 40f, 120f)))
+        assertEquals(listOf(second.identity, first.identity), store.options().map { it.identity })
+        assertEquals(firstKey, store.lazyKey(first.identity))
+        assertEquals(secondKey, store.lazyKey(second.identity))
+    }
+
+    @Test fun duplicateIdentitiesAndReplacedLeasesKeepCorrectMenuKeys() {
+        val store = store()
+        val first = entry("Run", item = "duplicate")
+        val second = first.copy(identity = first.identity.copy(instance = Any()), lease = Any())
+        store.update(first)
+        store.update(second)
+        val firstKey = store.lazyKey(first.identity)
+        assertNotEquals(firstKey, store.lazyKey(second.identity))
+        val replacement = first.copy(lease = Any())
+        store.update(replacement)
+        store.remove(first.identity, first.lease)
+        assertEquals(firstKey, store.lazyKey(first.identity))
+        store.remove(replacement.identity, replacement.lease)
+        store.update(replacement)
+        assertNotEquals(firstKey, store.lazyKey(first.identity))
+    }
+
     @Test fun duplicateItemKeysRemainSeparateCompositionInstances() {
         val store = store()
         val first = entry("Run", item = "duplicate")

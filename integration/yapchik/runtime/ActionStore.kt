@@ -22,6 +22,8 @@ data class ActionReference<Visual>(
 
 class ActionStore<Visual>(private val changed: () -> Unit = {}) {
     private val actions = linkedMapOf<ActionIdentity, ActionReference<Visual>>()
+    private val lazyKeys = mutableMapOf<ActionIdentity, Long>()
+    private var nextLazyKey = 0L
     private val owners = linkedMapOf<Any, ActionOwner>()
 
     fun updateOwner(identity: Any, owner: ActionOwner) {
@@ -37,14 +39,18 @@ class ActionStore<Visual>(private val changed: () -> Unit = {}) {
 
     fun update(reference: ActionReference<Visual>) {
         if (actions[reference.identity] != reference) {
+            lazyKeys.getOrPut(reference.identity) { nextLazyKey++ }
             actions[reference.identity] = reference
             changed()
         }
     }
 
+    fun lazyKey(identity: ActionIdentity): Long = lazyKeys.getValue(identity)
+
     fun remove(identity: ActionIdentity, lease: Any) {
         if (actions[identity]?.lease === lease) {
             actions.remove(identity)
+            lazyKeys.remove(identity)
             changed()
         }
     }

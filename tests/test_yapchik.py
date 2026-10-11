@@ -259,6 +259,11 @@ import androidx.compose.runtime.Composable
         self.assertIn("LICENSE", lock["files"])
         self.assertIn("NOTICE", lock["files"])
 
+    def test_options_menu_uses_saveable_store_keys(self):
+        source = (INTEGRATION / "runtime/YapchikRuntime.kt").read_text(encoding="utf-8")
+        self.assertIn("items(entries, key = { store.lazyKey(it.identity) })", source)
+        self.assertNotIn("items(entries, key = { it.identity })", source)
+
     def test_vendor_digests_ignore_only_checkout_line_ending_conversion(self):
         path = Path(self.directory.name) / "vendor-line-endings.kt"
         path.write_bytes(b"first\nsecond\n")

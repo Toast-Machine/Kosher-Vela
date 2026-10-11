@@ -98,7 +98,7 @@ class VariantTests(unittest.TestCase):
         item = release(1)
         state = initial_state([item])
         assets = sorted([{key: asset[key] for key in ("id", "name", "size", "updatedAt")} for asset in item["assets"]], key=lambda asset: asset["name"])
-        for profile in ("three-variants-v1", "two-variants-yapchik-v1", "kosher-with-yapchik-v1"):
+        for profile in ("three-variants-v1", "two-variants-yapchik-v1", "kosher-with-yapchik-v1", "kosher-with-yapchik-v2"):
             state["completed"]["1"] = {**item, "build_fingerprint": digest({
                 "id": item["id"], "sha": item["sha"], "assets": assets, "profile": profile,
             })}

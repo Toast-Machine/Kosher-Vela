@@ -339,7 +339,7 @@ private fun OptionsMenu(store: ActionStore<ActionVisual>, dismiss: () -> Unit) {
             Text("Options", style = MaterialTheme.typography.titleMedium)
             if (entries.isEmpty()) Text("No actions available")
             LazyColumn(state = scroll) {
-                items(entries, key = { it.identity }) { reference ->
+                items(entries, key = { store.lazyKey(it.identity) }) { reference ->
                     val highlighted = reference.identity == focused
                     Surface(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
