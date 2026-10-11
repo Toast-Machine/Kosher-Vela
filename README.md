@@ -3,6 +3,11 @@
 An automated, patch-only variant of [PimpinPumpkin/Vela](https://github.com/PimpinPumpkin/Vela).
 Android application ID: **`app.vela.kosher`**. It installs separately from upstream Vela.
 
+## Planned integrations
+
+The [Yapchik integration plan](docs/yapchik-integration-plan.md) records the agreed
+softkey/menu design. It is not implemented; map-control changes are deferred.
+
 ## Locked settings
 
 | Setting | Permanent value |
