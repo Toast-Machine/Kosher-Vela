@@ -13,6 +13,8 @@ the Kosher policy before Yapchik instrumentation when both features are selected
 - `runtime`: Compose action registration, current original handlers/presentation,
   clipped bounds, ownership, native-window suppression, softkeys, and Options UI.
 - `tests`: pure JVM action-store tests, also copied into customized app unit tests.
+- `compiler-fixtures`: type-checking regressions for transformed source, compiled
+  with minimal annotation/scope stubs by the local and CI Kotlin validation script.
 
 `scripts/yapchik.py` instruments supported Material controls and activation modifiers,
 captures original text/icons/state without replaying content lambdas, and wraps repeated
@@ -20,6 +22,10 @@ and custom composable call sites with identity scopes. Separate composition inst
 prevent duplicate logical item IDs from overwriting each other. Recognized unsupported
 patterns generate a coverage report and fail closed; this is not semantic coverage of
 arbitrary Kotlin or every possible future UI toolkit.
+
+Only provably Unit-returning custom composables receive UI ownership/item wrappers.
+Value-returning composables and expression bodies with unknown inferred return types
+remain unchanged, so remembered state/focus objects retain their original values.
 
 Known app adapters cover the Activity root, Search activation, persistent map ownership,
 blocking panel content, and the settings entry. Upstream changes to these require review.

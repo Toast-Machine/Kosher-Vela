@@ -92,17 +92,32 @@ class VariantTests(unittest.TestCase):
         state["completed"]["1"] = {**item, "build_fingerprint": digest({"id": item["id"], "sha": item["sha"], "assets": assets})}
         self.assertEqual("build", pending_releases([item], state)[0]["kind"])
 
-    def test_previous_multi_variant_profiles_are_rebuilt(self):
+    def test_previous_build_profiles_are_rebuilt(self):
         from sync import digest, initial_state, pending_releases
         from test_sync import release
         item = release(1)
         state = initial_state([item])
         assets = sorted([{key: asset[key] for key in ("id", "name", "size", "updatedAt")} for asset in item["assets"]], key=lambda asset: asset["name"])
-        for profile in ("three-variants-v1", "two-variants-yapchik-v1"):
+        for profile in ("three-variants-v1", "two-variants-yapchik-v1", "kosher-with-yapchik-v1"):
             state["completed"]["1"] = {**item, "build_fingerprint": digest({
                 "id": item["id"], "sha": item["sha"], "assets": assets, "profile": profile,
             })}
             self.assertEqual("build", pending_releases([item], state)[0]["kind"])
+
+    def test_corrected_recipe_retries_old_failures_without_resetting_state(self):
+        from datetime import datetime, timedelta, timezone
+        from sync import digest, initial_state, pending_releases
+        from test_sync import release
+        item = release(1)
+        state = initial_state([item])
+        excluded = list(state["excluded_release_ids"])
+        assets = sorted([{key: asset[key] for key in ("id", "name", "size", "updatedAt")} for asset in item["assets"]], key=lambda asset: asset["name"])
+        state["failed"] = {item["id"]: {
+            "build_fingerprint": digest({"id": item["id"], "sha": item["sha"], "assets": assets, "profile": "kosher-with-yapchik-v1"}),
+            "retry_at": (datetime.now(timezone.utc) + timedelta(hours=6)).isoformat(),
+        }}
+        self.assertEqual("build", pending_releases([item], state)[0]["kind"])
+        self.assertEqual(excluded, state["excluded_release_ids"])
 
     def test_missing_variant_does_not_start_publication(self):
         api = Mock()

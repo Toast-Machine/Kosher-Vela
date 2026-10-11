@@ -5,7 +5,8 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
-from kotlin_source import INTEGRATION, parser_classpath
+from kotlin_source import INTEGRATION, parse, parser_classpath
+from yapchik import edits_for_file
 
 
 ARTIFACTS = {
@@ -32,11 +33,19 @@ def main():
         dependencies.append(str(target.resolve()))
     classpath = parser_classpath() + os.pathsep + os.pathsep.join(dependencies)
     with tempfile.TemporaryDirectory() as classes:
+        fixture = INTEGRATION / "compiler-fixtures/ValueComposables.kt"
+        transformed, report = edits_for_file(parse([fixture])[0])
+        if report["unsupported"]:
+            raise RuntimeError("Compiler regression fixture has unsupported cases")
+        source = Path(classes) / "ValueComposables.kt"
+        source.write_bytes(transformed)
         subprocess.run([
             "java", "-cp", classpath, "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler",
             "-no-stdlib", "-no-reflect", "-jvm-target", "17", "-classpath", classpath,
             "-d", classes, str(INTEGRATION / "runtime/ActionStore.kt"),
             str(INTEGRATION / "tests/ActionStoreTest.kt"),
+            str(source), str(INTEGRATION / "compiler-fixtures/ComposeAnnotation.kt"),
+            str(INTEGRATION / "compiler-fixtures/ItemScope.kt"),
         ], check=True)
         subprocess.run([
             "java", "-cp", classes + os.pathsep + classpath,

@@ -57,6 +57,19 @@ def resolve(file, call, source):
     return stars[0] if len(stars) == 1 else None
 
 
+def ui_composables(files):
+    candidates = {}
+    for file in files:
+        for function in file["functions"]:
+            if not function["composable"]:
+                continue
+            symbol = file["package"] + "." + function["name"]
+            result = function["return_type"]
+            unit = result in {"Unit", "kotlin.Unit"} or result is None and function["block_body"]
+            candidates.setdefault(symbol, []).append(unit)
+    return {symbol for symbol, overloads in candidates.items() if all(overloads)}
+
+
 def edits_for_file(file, composables=None):
     path = Path(file["path"])
     source = path.read_bytes().replace(b"\r\n", b"\n")
@@ -64,7 +77,8 @@ def edits_for_file(file, composables=None):
     report = {"discovered": [], "instrumented": [], "excluded": [], "unsupported": []}
     calls = file["calls"]
     functions = {tuple(function["span"]): function for function in file["functions"]}
-    composables = composables or {file["package"] + "." + function["name"] for function in file["functions"] if function["composable"]}
+    if composables is None:
+        composables = ui_composables([file])
     actions = []
 
     def record(category, call, reason):
@@ -280,7 +294,7 @@ def instrument(paths, report_path):
     report = {"parser": "Kotlin PSI 2.1.20", "yapchik_revision": PIN,
               "discovered": [], "instrumented": [], "excluded": [], "unsupported": []}
     prepared = []
-    composables = {file["package"] + "." + function["name"] for file in files for function in file["functions"] if function["composable"]}
+    composables = ui_composables(files)
     for file in files:
         result, coverage = edits_for_file(file, composables)
         prepared.append((Path(file["path"]), result))

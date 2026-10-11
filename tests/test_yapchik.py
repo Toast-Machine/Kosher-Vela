@@ -5,12 +5,13 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from kotlin_source import parse
-from yapchik import edits_for_file, instrument, vendor_digest, verify_vendor
+from kotlin_source import INTEGRATION, parse
+from yapchik import edits_for_file, instrument, ui_composables, vendor_digest, verify_vendor
 
 
 class InstrumentationTests(unittest.TestCase):
     fixtures = {
+        "value_composables": (INTEGRATION / "compiler-fixtures/ValueComposables.kt").read_text(encoding="utf-8"),
         "named_window": '''package fixture
 import androidx.compose.ui.window.Dialog
 import androidx.compose.material3.Button
@@ -136,6 +137,27 @@ import androidx.compose.runtime.Composable
         source, report = self.transformed("named_window")
         self.assertIn('content = {', source)
         self.assertIn('YapchikScope(blocking = true, suppress = true)', source)
+
+    def test_value_returning_composables_keep_their_values_in_both_repeat_forms(self):
+        source, report = self.transformed("value_composables")
+        for assignment in ('val remembered = rememberDpadFocusKeeper()',
+                           'val explicit = KeeperFactory()', 'val inferred = InferredKeeperFactory()'):
+            self.assertEqual(2, source.count(assignment))
+        self.assertIn('YapchikItem', source)
+        self.assertIn(' { KeeperRow(remembered)', source)
+        self.assertIn(' { ExplicitUnitRow(explicit)', source)
+
+    def test_ui_scope_candidates_require_a_unit_return_type(self):
+        candidates = ui_composables([self.syntax["value_composables"]])
+        self.assertIn('fixture.KeeperRow', candidates)
+        self.assertIn('fixture.ExplicitUnitRow', candidates)
+        self.assertNotIn('fixture.rememberDpadFocusKeeper', candidates)
+        self.assertNotIn('fixture.KeeperFactory', candidates)
+        self.assertNotIn('fixture.InferredKeeperFactory', candidates)
+
+    def test_empty_cross_file_ui_candidates_do_not_fall_back_to_local_symbols(self):
+        source, report = edits_for_file(self.syntax["value_composables"], set())
+        self.assertNotIn(b'YapchikItem', source)
 
     def test_multiple_activations_on_one_control_fail_for_review(self):
         source = self.fixtures["modifier"].replace('import androidx.compose.foundation.clickable',

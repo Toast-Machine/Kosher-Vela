@@ -133,6 +133,8 @@ public final class KotlinSyntax {
                         annotation -> annotation.getShortName() != null && annotation.getShortName().asString().equals("Composable"));
                     functions.add("{\"name\":" + quote(function.getName()) + ",\"span\":" + span(function)
                         + ",\"body\":" + span(function.getBodyExpression()) + ",\"composable\":" + composable
+                        + ",\"return_type\":" + quote(function.getTypeReference() == null ? null : function.getTypeReference().getText())
+                        + ",\"block_body\":" + (function.getBodyExpression() instanceof KtBlockExpression)
                         + ",\"parameters\":" + list(parameters) + "}");
                 }
                 List<String> calls = new ArrayList<>();
