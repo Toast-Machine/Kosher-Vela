@@ -17,14 +17,15 @@ validation remain outstanding. The design below is retained as the acceptance co
   instance identities, including duplicate item IDs. Custom composable call sites
   also contribute scopes. Multiple activations sharing a control require adapter review.
 - `scripts/variants.py` supports neither/either/both features internally. Releases build
-  Kosher with Yapchik (`app.vela.kosher`) and Yapchik-only (`app.vela.yapchik`) from
-  isolated exact-commit trees, run app unit tests, verify package/version/signature,
-  and require both sets of assets. The Kosher-only release and separate combined
-  package have been removed; existing Kosher installations gain Yapchik in place.
+  only Kosher with Yapchik (`app.vela.kosher`) from an isolated exact-commit tree,
+  run app unit tests, and verify package/version/signature. Standalone Yapchik,
+  Kosher-only, and separate combined-package releases have been removed; existing
+  Kosher installations gain Yapchik in place. Release CI supports pushes and manual
+  dispatch on `Yapchik`, with branch-specific state and keepalive updates.
 - Local checks cover parser fixtures, variants, updater isolation, publication
   prerequisites, and Kotlin action-store behavior. Runtime plus vendored library compile
   against real Android/Compose artifacts. Fresh upstream integration discovers 344
-  controls in both Yapchik variants with no recognized unsupported cases.
+  controls in the combined build with no recognized unsupported cases.
 - Full Android Gradle/APK compilation is not locally verified because the Android SDK
   is missing. Small-screen insets, key profiles/calibration, touch behavior, and device
   focus acceptance tests are not yet performed. CI must pass before release.
@@ -60,10 +61,9 @@ Keep the library, application bridge, instrumentation, configuration, and tests
 separate from kashering. Neither feature may depend on the other.
 
 Support applying neither feature, Yapchik only, kashering only, or both. This is
-feature modularity. The revised implementation request specifies two release variants,
-both with Yapchik, using distinct package IDs and variant-isolated updater selection,
-retaining the existing
-signing key. When both are selected, apply existing customization patches first and
+feature modularity. The revised implementation request specifies only `app.vela.kosher`
+with both features, retaining the existing signing key and Kosher updater asset prefix.
+When both are selected, apply existing customization patches first and
 instrument the resulting source. Use a separate integration entry point called by
 the build orchestrator, not transformations inside `scripts/policy.py`.
 

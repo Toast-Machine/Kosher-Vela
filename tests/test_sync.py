@@ -1,12 +1,17 @@
+import base64
 import copy
+import json
+import os
 import sys
+import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from sync import (fingerprints, initial_state, list_releases, pending_releases, prune_failures,
-                  state_commit_message)
+                  keepalive, read_remote_state, record_completion, state_branch, state_commit_message)
 
 
 def release(number, tag=None):
@@ -24,6 +29,43 @@ def release(number, tag=None):
 
 
 class ReleaseTrackingTests(unittest.TestCase):
+    def test_state_branch_defaults_to_main_and_accepts_branch_override(self):
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertEqual("main", state_branch())
+        with patch.dict(os.environ, {"RELEASE_STATE_BRANCH": "Yapchik"}):
+            self.assertEqual("Yapchik", state_branch())
+
+    def test_remote_state_is_read_from_selected_branch(self):
+        api = Mock()
+        api.request.return_value = {"content": base64.b64encode(b'{"completed": {}}').decode(), "sha": "state-sha"}
+        with patch.dict(os.environ, {"RELEASE_STATE_BRANCH": "feature/Yapchik"}):
+            self.assertEqual(({"completed": {}}, "state-sha"), read_remote_state(api))
+        self.assertTrue(api.request.call_args.args[0].endswith("?ref=feature%2FYapchik"))
+
+    def test_completion_writes_state_to_selected_branch_not_main(self):
+        api = Mock()
+        api.request.return_value = None
+        item = release(1)
+        state = initial_state([item])
+        with tempfile.TemporaryDirectory() as temporary:
+            (Path(temporary) / "receipt.json").write_text(json.dumps(item), encoding="utf-8")
+            with patch.dict(os.environ, {"RELEASE_STATE_BRANCH": "Yapchik"}), \
+                    patch("sync.read_remote_state", return_value=(state, "state-sha")):
+                record_completion(api, temporary)
+        updates = [call for call in api.request.call_args_list if call.kwargs.get("method") == "PUT"]
+        self.assertEqual(1, len(updates))
+        self.assertEqual("Yapchik", updates[0].args[1]["branch"])
+
+    def test_keepalive_reads_and_updates_selected_branch(self):
+        api = Mock()
+        old = (datetime.now(timezone.utc) - timedelta(days=40)).isoformat()
+        api.request.side_effect = [[{"commit": {"committer": {"date": old}}}], None, None]
+        with patch.dict(os.environ, {"RELEASE_STATE_BRANCH": "Yapchik"}):
+            keepalive(api)
+        self.assertIn("?sha=Yapchik&", api.request.call_args_list[0].args[0])
+        self.assertTrue(api.request.call_args_list[1].args[0].endswith("?ref=Yapchik"))
+        self.assertEqual("Yapchik", api.request.call_args_list[2].args[1]["branch"])
+
     def test_failed_build_cooldown_does_not_drop_new_releases(self):
         initial = release(1)
         state = initial_state([initial])

@@ -12,14 +12,12 @@ from variants import VARIANTS, apply_features, configure_updater, customize
 
 
 class VariantTests(unittest.TestCase):
-    def test_two_packages_preserve_kosher_identity_and_both_include_yapchik(self):
-        self.assertEqual({"kosher", "yapchik"}, set(VARIANTS))
+    def test_only_kosher_package_is_released_with_both_features(self):
+        self.assertEqual({"kosher"}, set(VARIANTS))
         self.assertEqual("app.vela.kosher", VARIANTS["kosher"]["package"])
-        self.assertEqual("app.vela.yapchik", VARIANTS["yapchik"]["package"])
-        self.assertEqual(2, len({value["package"] for value in VARIANTS.values()}))
+        self.assertEqual(1, len({value["package"] for value in VARIANTS.values()}))
         self.assertTrue(all(value["yapchik"] for value in VARIANTS.values()))
         self.assertTrue(VARIANTS["kosher"]["kosher"])
-        self.assertFalse(VARIANTS["yapchik"]["kosher"])
 
     def test_only_selected_independent_features_are_applied_in_order(self):
         for variant, features in VARIANTS.items():
@@ -57,9 +55,9 @@ class VariantTests(unittest.TestCase):
             updater.parent.mkdir(parents=True)
             updater.write_text("fun pickApk() = unknown()")
             with self.assertRaisesRegex(RuntimeError, "selection changed"):
-                configure_updater(root, "yapchik")
+                configure_updater(root, "kosher")
 
-    def test_release_requires_both_apks_and_source_archives(self):
+    def test_release_requires_kosher_apk_and_source_archive(self):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)
             item = {"sha": "source", "tag": "v0.5.1"}
@@ -73,15 +71,19 @@ class VariantTests(unittest.TestCase):
                     "source_sha256": hashlib.sha256(b"source").hexdigest(),
                 }))
             validate_assets(directory, item)
-            (directory / "yapchik-vela-v0.5.1.apk").write_bytes(b"corrupted")
-            with self.assertRaisesRegex(RuntimeError, "Incomplete two-variant"):
+            (directory / "kosher-vela-v0.5.1.apk").write_bytes(b"corrupted")
+            with self.assertRaisesRegex(RuntimeError, "Incomplete Kosher Yapchik"):
                 validate_assets(directory, item)
-            (directory / "yapchik-vela-v0.5.1.apk").write_bytes(b"yapchik")
-            (directory / "yapchik-vela-v0.5.1-source.tar.gz").write_bytes(b"corrupted")
-            with self.assertRaisesRegex(RuntimeError, "Incomplete two-variant"):
+            (directory / "kosher-vela-v0.5.1.apk").write_bytes(b"kosher")
+            (directory / "yapchik-vela-v0.5.1.apk").write_bytes(b"obsolete")
+            with self.assertRaisesRegex(RuntimeError, "only the configured Kosher APK"):
+                validate_assets(directory, item)
+            (directory / "yapchik-vela-v0.5.1.apk").unlink()
+            (directory / "kosher-vela-v0.5.1-source.tar.gz").write_bytes(b"corrupted")
+            with self.assertRaisesRegex(RuntimeError, "Incomplete Kosher Yapchik"):
                 validate_assets(directory, item)
 
-    def test_legacy_completed_release_is_rebuilt_for_two_variant_profile(self):
+    def test_legacy_completed_release_is_rebuilt_for_combined_profile(self):
         from sync import digest, fingerprints, initial_state, pending_releases
         from test_sync import release
         item = release(1)
@@ -90,16 +92,17 @@ class VariantTests(unittest.TestCase):
         state["completed"]["1"] = {**item, "build_fingerprint": digest({"id": item["id"], "sha": item["sha"], "assets": assets})}
         self.assertEqual("build", pending_releases([item], state)[0]["kind"])
 
-    def test_three_variant_completed_release_is_rebuilt_for_new_profile(self):
+    def test_previous_multi_variant_profiles_are_rebuilt(self):
         from sync import digest, initial_state, pending_releases
         from test_sync import release
         item = release(1)
         state = initial_state([item])
         assets = sorted([{key: asset[key] for key in ("id", "name", "size", "updatedAt")} for asset in item["assets"]], key=lambda asset: asset["name"])
-        state["completed"]["1"] = {**item, "build_fingerprint": digest({
-            "id": item["id"], "sha": item["sha"], "assets": assets, "profile": "three-variants-v1",
-        })}
-        self.assertEqual("build", pending_releases([item], state)[0]["kind"])
+        for profile in ("three-variants-v1", "two-variants-yapchik-v1"):
+            state["completed"]["1"] = {**item, "build_fingerprint": digest({
+                "id": item["id"], "sha": item["sha"], "assets": assets, "profile": profile,
+            })}
+            self.assertEqual("build", pending_releases([item], state)[0]["kind"])
 
     def test_missing_variant_does_not_start_publication(self):
         api = Mock()

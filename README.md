@@ -1,16 +1,15 @@
 # Kosher Vela
 
-Automated, patch-only variants of [PimpinPumpkin/Vela](https://github.com/PimpinPumpkin/Vela).
-Each mirrored release produces two separately installable universal APKs:
+An automated, patch-only build of [PimpinPumpkin/Vela](https://github.com/PimpinPumpkin/Vela).
+Each mirrored release produces one universal APK with both kashering and Yapchik:
 
 | Build | Android application ID | Features |
 | --- | --- | --- |
 | Kosher | `app.vela.kosher` | Locked content settings and Yapchik hardware softkeys |
-| Yapchik | `app.vela.yapchik` | Hardware softkeys; ordinary upstream content settings |
 
-Each variant's updater selects only its own APKs. Existing Kosher installations retain
-their application ID and signing key and gain Yapchik when updated. There is no
-Kosher-only release or separate `app.vela.kosher.yapchik` package. Feature transformations
+The updater selects only Kosher APKs. Existing Kosher installations retain their
+application ID and signing key and gain Yapchik when updated. There are no standalone
+Yapchik, Kosher-only, or separate combined-package releases. Feature transformations
 remain independent internally.
 
 ## Yapchik integration
@@ -46,6 +45,11 @@ tamper-proof device-management system. Other upstream features are not silently 
 
 - GitHub Actions checks upstream every five minutes, at minutes 2, 7, 12, and so on.
   GitHub scheduling is best-effort, so checks and builds may be delayed.
+- Release CI also runs on code/workflow pushes to `main` and `Yapchik`, and can be
+  manually dispatched with `Yapchik` selected. State and keepalive commits target
+  the run's branch, not hard-coded `main`; state-only pushes do not retrigger builds.
+  Scheduled events still run only on GitHub's default branch. Push/manual runs let
+  `Yapchik` build and publish without merging; they do not add a second cron scheduler.
 - The one-time bootstrap queues **only the five newest published app releases**, including
   prereleases and canary. All older releases are permanently excluded in `.state/releases.json`.
 - Every later poll visits **every page** of upstream releases. There is no five-release limit
@@ -68,9 +72,9 @@ tamper-proof device-management system. Other upstream features are not silently 
 - If there have been no commits for 30 days, a scheduled run commits a small keepalive file
   to avoid GitHub's 60-day public-repository scheduled-workflow inactivity cutoff.
 
-Each release includes two signed APKs, per-variant `*-build.json` provenance, SHA-256
-checksums, and two full patched-source archives including their runtime binaries.
-Both variants must build and verify before publication; an incomplete replacement
+Each release includes one signed APK, `kosher-build.json` provenance, SHA-256
+checksums, and a full patched-source archive including its runtime binaries.
+The combined build must verify before publication; an incomplete replacement
 remains draft. The source
 archive is the customized app source; GitHub's automatic source downloads describe this
 automation repository instead. Preserve the upstream GPL license and bundled license notices.
@@ -86,7 +90,7 @@ installations cannot accept updates signed with a replacement key.
 
 Use **Actions → Mirror Vela app releases → Run workflow** for an immediate check. This does
 not reset the initial five-release boundary. Completed releases with an older build profile
-are rebuilt once for the two-variant Yapchik build profile; excluded historical releases stay
+are rebuilt once for the Kosher-with-Yapchik build profile; excluded historical releases stay
 excluded. The workflow also
 accepts `repository_dispatch` with type `upstream-release` if direct notifications are added
 later; dispatch payloads are never trusted as source/build inputs.

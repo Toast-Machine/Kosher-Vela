@@ -121,8 +121,12 @@ def write_json(path, value):
     path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
 
+def state_branch():
+    return os.environ.get("RELEASE_STATE_BRANCH") or "main"
+
+
 def read_remote_state(api):
-    remote = api.request(f"repos/{DESTINATION}/contents/{STATE_PATH}?ref=main")
+    remote = api.request(f"repos/{DESTINATION}/contents/{STATE_PATH}?ref=" + quote(state_branch(), safe=""))
     return json.loads(base64.b64decode(remote["content"])), remote["sha"]
 
 
@@ -208,7 +212,7 @@ def record_completion(api, receipts):
         content = base64.b64encode((json.dumps(state, indent=2) + "\n").encode()).decode()
         api.request(f"repos/{DESTINATION}/contents/{STATE_PATH}", {
             "message": state_commit_message(published, failed, cleared), "content": content,
-            "sha": sha, "branch": "main",
+            "sha": sha, "branch": state_branch(),
         }, method="PUT")
     upstream_latest = api.request(f"repos/{UPSTREAM}/releases/latest", missing_ok=True)
     if upstream_latest and any(entry["tag"] == upstream_latest["tag_name"] for entry in state["completed"].values()):
@@ -221,15 +225,16 @@ def record_completion(api, receipts):
 
 
 def keepalive(api):
-    commits = api.request(f"repos/{DESTINATION}/commits?sha=main&per_page=1")
+    branch = state_branch()
+    commits = api.request(f"repos/{DESTINATION}/commits?sha={quote(branch, safe='')}&per_page=1")
     latest = datetime.fromisoformat(commits[0]["commit"]["committer"]["date"].replace("Z", "+00:00"))
     now = datetime.now(timezone.utc)
     if (now - latest).days < 30:
         return
     path = ".github/keepalive.txt"
-    previous = api.request(f"repos/{DESTINATION}/contents/{path}?ref=main", missing_ok=True)
+    previous = api.request(f"repos/{DESTINATION}/contents/{path}?ref=" + quote(branch, safe=""), missing_ok=True)
     payload = {
-        "message": "Keep release polling active", "branch": "main",
+        "message": "Keep release polling active", "branch": branch,
         "content": base64.b64encode((now.isoformat() + "\n").encode()).decode(),
     }
     if previous:

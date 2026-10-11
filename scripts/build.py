@@ -203,6 +203,10 @@ def build_variants(api, item, root):
 
 def validate_assets(directory, item):
     directory = Path(directory)
+    safe_tag = re.sub(r"[^A-Za-z0-9._-]", "_", item["tag"])
+    expected_apks = {f"{variant}-vela-{safe_tag}.apk" for variant in VARIANTS}
+    if {path.name for path in directory.glob("*.apk")} != expected_apks:
+        raise RuntimeError("Release must contain only the configured Kosher APK")
     for variant, features in VARIANTS.items():
         path = directory / f"{variant}-build.json"
         info = json.loads(path.read_text())
@@ -214,7 +218,7 @@ def validate_assets(directory, item):
         if (not source.is_file() or not apk.is_file()
                 or hashlib.sha256(apk.read_bytes()).hexdigest() != info["apk_sha256"]
                 or hashlib.sha256(source.read_bytes()).hexdigest() != info["source_sha256"]):
-            raise RuntimeError("Incomplete two-variant release: " + variant)
+            raise RuntimeError("Incomplete Kosher Yapchik release: " + variant)
 
 
 def gh(*arguments):
@@ -262,9 +266,8 @@ def publish(api, item):
 
 def variant_description():
     return (
-        "\n\n---\nTwo separately installable builds:\n"
+        "\n\n---\nKosher Vela with Yapchik:\n"
         "- Kosher (`app.vela.kosher`): locked content policy and Yapchik hardware softkeys.\n"
-        "- Yapchik (`app.vela.yapchik`): hardware softkeys, ordinary upstream content settings.\n"
     )
 
 

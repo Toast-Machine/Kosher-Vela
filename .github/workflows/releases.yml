@@ -1,6 +1,16 @@
 name: Mirror Vela app releases
 
 on:
+  push:
+    branches: [main, Yapchik]
+    paths:
+      - 'scripts/**'
+      - 'tests/**'
+      - 'patches/**'
+      - 'policy-tests/**'
+      - 'integration/**'
+      - '.gitattributes'
+      - '.github/workflows/**'
   schedule:
     - cron: '2-57/5 * * * *'
   workflow_dispatch:
@@ -9,6 +19,9 @@ on:
 
 permissions:
   contents: read
+
+env:
+  RELEASE_STATE_BRANCH: ${{ github.ref_name }}
 
 concurrency:
   group: vela-release-sync
@@ -84,7 +97,7 @@ jobs:
       - name: Set up Gradle caching
         if: matrix.kind == 'build'
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c
-      - name: Build and verify both signed variants from isolated source trees
+      - name: Build and verify Kosher Vela with Yapchik and kashering
         if: matrix.kind == 'build'
         env:
           GH_TOKEN: ${{ github.token }}
