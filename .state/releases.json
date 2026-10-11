@@ -36,25 +36,25 @@
     "407070302": {
       "tag": "v0.5.2435",
       "source_sha": "9f8b684779c36debdd3ea8940091e0beeeb6be5a",
-      "build_fingerprint": "dd26f27eeb50daa2f760e5e4577cb2dcc5bdfc664d0bd06b2c5930cfa80b5c12",
+      "build_fingerprint": "b9552c851d7faccfcf5431e569a987001b2e907723add4c98c3ff7f967f68531",
       "metadata_fingerprint": "3129bcab43b4607536fba7b86235a6cf4291b22a66764e10380391b18f53114e"
     },
     "407163615": {
       "tag": "v0.5.2444",
       "source_sha": "4c2dad1fd16404574c95c6daa0f2d6e600c1b728",
-      "build_fingerprint": "4c4d28fc506c25ccb7f8873f0876b5878b7716870565449fd2ec2a82e706fd2d",
+      "build_fingerprint": "2c35b83d124a285727c328562e5f2457c41830cd600c9dbb3506dab132363333",
       "metadata_fingerprint": "f44953f5eb8ad37689bfd1d17900a3ed5064df72ac69a3ea0bf4c3fbf390f9c9"
     },
     "406007530": {
       "tag": "v0.4.2373",
       "source_sha": "6daa576f7242cb3c6189afdb2044c44396019385",
-      "build_fingerprint": "d3683337a07c381f0fa66a64b19c99e2a01422a48989f108696521016c4b2cc3",
+      "build_fingerprint": "dc2a854ae77c2187d7f09ecd6e66122d4be4de75dd0649d645dda6806e57c722",
       "metadata_fingerprint": "f104bc5f4629bc701ca82658e913ab72bfeecb7898157e8c87ecd6495a8bd13f"
     },
     "406942601": {
       "tag": "v0.5.2426",
       "source_sha": "163d4699150e8bc0cb236a99b56305506a758236",
-      "build_fingerprint": "5db2cf1a7deeab7739ea7dd034afb8c1ff76969d0f76a85a5467f1d796775667",
+      "build_fingerprint": "3cf22a9df68eecf779cc5a3017222d42af2df0fe5825f5cbb02d9c7ce39d1a75",
       "metadata_fingerprint": "fd9c4d32ca308c61d4e4d49585a3d46f015ba2616d656b85685c2c3377759f89"
     },
     "407341870": {
@@ -66,7 +66,7 @@
     "408154876": {
       "tag": "v0.5.2459",
       "source_sha": "2b3f007a924fc9559d62bee9b4574cb880b41f50",
-      "build_fingerprint": "600fb36441c52133fd219574f61f893bf048665f273bf977e259a91ff50b3717",
+      "build_fingerprint": "136fb281f4fa0c0500f605ebde2c85e908d79909e4b0216a6c49eacc87bdb4de",
       "metadata_fingerprint": "b5201436bc03acb2b0a71389b671f214da13a583075ce7fae85b08f31ca69ec0"
     },
     "408407005": {
@@ -96,7 +96,7 @@
     "409051564": {
       "tag": "v0.5.2484",
       "source_sha": "ce1c9a2a0f9593aa6e6d4de02798911e8b1f6b62",
-      "build_fingerprint": "44b4182ff3732aa0d2fb04828c8dcf13849e64a81ea07d7a991e5e7f9bc87347",
+      "build_fingerprint": "f6cdb379243fd2713bc1d2231a9f8542e7213e660e7cf9e784480bc25b3d07b8",
       "metadata_fingerprint": "21083916944372dcf7ed3862c6583e74d99dc01601dbb944addd8e566e0d2c81"
     },
     "409199840": {
@@ -110,169 +110,13 @@
       "source_sha": "b61b4c930d83ede8c09d19a2eaeedd9e7994a6fb",
       "build_fingerprint": "f602153aab172c8fd431e37d2204732adad7ad33f58b4762e285454bcf091dca",
       "metadata_fingerprint": "024b944d84eaea8d94efb41991040f89a14f2301b686f24ec40575c635d6d2a4"
-    }
-  },
-  "failed": {
-    "408154876": {
-      "id": "408154876",
-      "tag": "v0.5.2459",
-      "name": "Vela 0.5.2459 nightly",
-      "sha": "2b3f007a924fc9559d62bee9b4574cb880b41f50",
-      "prerelease": true,
-      "created_at": "2026-10-08T23:21:11Z",
-      "published_at": "2026-10-09T17:15:22Z",
-      "updated_at": "2026-10-09T17:15:22Z",
-      "assets": [
-        {
-          "id": "RA_kwDOS7JZe84lSmjd",
-          "name": "vela-maps-v0.5.2459.apk",
-          "size": 116322845,
-          "updatedAt": "2026-10-09T17:15:21Z",
-          "downloadUrl": "https://github.com/PimpinPumpkin/Vela/releases/download/v0.5.2459/vela-maps-v0.5.2459.apk"
-        }
-      ],
-      "build_fingerprint": "53f70765984169111801a7049a5d4d7624bfb5dd5a3932360720ce913be3e8c3",
-      "metadata_fingerprint": "b5201436bc03acb2b0a71389b671f214da13a583075ce7fae85b08f31ca69ec0",
-      "kind": "build",
-      "retry_at": "2026-10-12T02:44:59.532414+00:00"
-    },
-    "407070302": {
-      "id": "407070302",
-      "tag": "v0.5.2435",
-      "name": "Vela 0.5.2435",
-      "sha": "9f8b684779c36debdd3ea8940091e0beeeb6be5a",
-      "prerelease": false,
-      "created_at": "2026-10-08T16:38:56Z",
-      "published_at": "2026-10-08T17:00:23Z",
-      "updated_at": "2026-10-08T17:07:53Z",
-      "assets": [
-        {
-          "id": "RA_kwDOS7JZe84lGcFr",
-          "name": "vela-maps-v0.5.2435.apk",
-          "size": 116310721,
-          "updatedAt": "2026-10-08T17:00:22Z",
-          "downloadUrl": "https://github.com/PimpinPumpkin/Vela/releases/download/v0.5.2435/vela-maps-v0.5.2435.apk"
-        }
-      ],
-      "build_fingerprint": "88704b05ebfc33c21e15acb4b89c70c1a1705a4a2e5d8b2df4a2880f4617e030",
-      "metadata_fingerprint": "3129bcab43b4607536fba7b86235a6cf4291b22a66764e10380391b18f53114e",
-      "kind": "build",
-      "retry_at": "2026-10-12T02:42:06.294864+00:00"
-    },
-    "407163615": {
-      "id": "407163615",
-      "tag": "v0.5.2444",
-      "name": "Vela 0.5.2444 nightly",
-      "sha": "4c2dad1fd16404574c95c6daa0f2d6e600c1b728",
-      "prerelease": true,
-      "created_at": "2026-10-08T18:24:33Z",
-      "published_at": "2026-10-08T18:56:02Z",
-      "updated_at": "2026-10-08T18:56:02Z",
-      "assets": [
-        {
-          "id": "RA_kwDOS7JZe84lHdkC",
-          "name": "vela-maps-v0.5.2444.apk",
-          "size": 116310721,
-          "updatedAt": "2026-10-08T18:56:01Z",
-          "downloadUrl": "https://github.com/PimpinPumpkin/Vela/releases/download/v0.5.2444/vela-maps-v0.5.2444.apk"
-        }
-      ],
-      "build_fingerprint": "4348be6197a21d1331d0f3b904bfdd5edb7fdcb0b48a7629c04521746f5ea55b",
-      "metadata_fingerprint": "f44953f5eb8ad37689bfd1d17900a3ed5064df72ac69a3ea0bf4c3fbf390f9c9",
-      "kind": "build",
-      "retry_at": "2026-10-12T02:43:43.561599+00:00"
-    },
-    "406007530": {
-      "id": "406007530",
-      "tag": "v0.4.2373",
-      "name": "Vela 0.4.2373 nightly",
-      "sha": "6daa576f7242cb3c6189afdb2044c44396019385",
-      "prerelease": true,
-      "created_at": "2026-10-07T17:09:44Z",
-      "published_at": "2026-10-07T17:39:24Z",
-      "updated_at": "2026-10-07T17:39:24Z",
-      "assets": [
-        {
-          "id": "RA_kwDOS7JZe84k6qNG",
-          "name": "vela-maps-v0.4.2373.apk",
-          "size": 116182565,
-          "updatedAt": "2026-10-07T17:39:23Z",
-          "downloadUrl": "https://github.com/PimpinPumpkin/Vela/releases/download/v0.4.2373/vela-maps-v0.4.2373.apk"
-        }
-      ],
-      "build_fingerprint": "155ae8d8726ed7524ef086a8e398ae088b36a0afbd3ea1785053ae60adef2856",
-      "metadata_fingerprint": "f104bc5f4629bc701ca82658e913ab72bfeecb7898157e8c87ecd6495a8bd13f",
-      "kind": "build",
-      "retry_at": "2026-10-12T02:39:09.675922+00:00"
-    },
-    "406942601": {
-      "id": "406942601",
-      "tag": "v0.5.2426",
-      "name": "Vela 0.5.2426",
-      "sha": "163d4699150e8bc0cb236a99b56305506a758236",
-      "prerelease": false,
-      "created_at": "2026-10-08T09:48:39Z",
-      "published_at": "2026-10-08T14:47:32Z",
-      "updated_at": "2026-10-08T14:50:31Z",
-      "assets": [
-        {
-          "id": "RA_kwDOS7JZe84lFKhc",
-          "name": "vela-maps-v0.5.2426.apk",
-          "size": 116308837,
-          "updatedAt": "2026-10-08T14:47:31Z",
-          "downloadUrl": "https://github.com/PimpinPumpkin/Vela/releases/download/v0.5.2426/vela-maps-v0.5.2426.apk"
-        }
-      ],
-      "build_fingerprint": "ae1e294acb93d445435f331e498e96c1452c31b3ef29320b4238989505619067",
-      "metadata_fingerprint": "fd9c4d32ca308c61d4e4d49585a3d46f015ba2616d656b85685c2c3377759f89",
-      "kind": "build",
-      "retry_at": "2026-10-12T02:38:22.744301+00:00"
     },
     "409784576": {
-      "id": "409784576",
       "tag": "v0.5.2493",
-      "name": "Vela 0.5.2493 nightly",
-      "sha": "1e9d6782b6620201f91ed6f08a8a375c357dfbb2",
-      "prerelease": true,
-      "created_at": "2026-10-10T17:36:13Z",
-      "published_at": "2026-10-11T16:30:11Z",
-      "updated_at": "2026-10-11T16:30:11Z",
-      "assets": [
-        {
-          "id": "RA_kwDOS7JZe84ln7vi",
-          "name": "vela-maps-v0.5.2493.apk",
-          "size": 116449825,
-          "updatedAt": "2026-10-11T16:30:11Z",
-          "downloadUrl": "https://github.com/PimpinPumpkin/Vela/releases/download/v0.5.2493/vela-maps-v0.5.2493.apk"
-        }
-      ],
-      "build_fingerprint": "8c0449b7b7ad6fdf440e33e74a7ede6ac5ae14eeba213e721b7495ac7a59d248",
-      "metadata_fingerprint": "b498eaccc47ec910419b130a5e2ad994741c0bc542ecda0c1b170cc3f143bbb6",
-      "kind": "build",
-      "retry_at": "2026-10-12T02:47:39.889786+00:00"
-    },
-    "409051564": {
-      "id": "409051564",
-      "tag": "v0.5.2484",
-      "name": "Vela 0.5.2484 nightly",
-      "sha": "ce1c9a2a0f9593aa6e6d4de02798911e8b1f6b62",
-      "prerelease": true,
-      "created_at": "2026-10-10T04:37:32Z",
-      "published_at": "2026-10-10T16:04:08Z",
-      "updated_at": "2026-10-10T16:04:08Z",
-      "assets": [
-        {
-          "id": "RA_kwDOS7JZe84ldE0S",
-          "name": "vela-maps-v0.5.2484.apk",
-          "size": 116428997,
-          "updatedAt": "2026-10-10T16:04:08Z",
-          "downloadUrl": "https://github.com/PimpinPumpkin/Vela/releases/download/v0.5.2484/vela-maps-v0.5.2484.apk"
-        }
-      ],
-      "build_fingerprint": "824f7cd775791879ccc6088e111eb5a12e9a5aec7d6c3094971159bf23dc79b6",
-      "metadata_fingerprint": "21083916944372dcf7ed3862c6583e74d99dc01601dbb944addd8e566e0d2c81",
-      "kind": "build",
-      "retry_at": "2026-10-12T02:47:59.900201+00:00"
+      "source_sha": "1e9d6782b6620201f91ed6f08a8a375c357dfbb2",
+      "build_fingerprint": "f926136c160d28fa92e7051b318d554b7a79b4a9da8e405ba8caca96ec479c91",
+      "metadata_fingerprint": "b498eaccc47ec910419b130a5e2ad994741c0bc542ecda0c1b170cc3f143bbb6"
     }
-  }
+  },
+  "failed": {}
 }
