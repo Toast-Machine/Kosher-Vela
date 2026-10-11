@@ -8,6 +8,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 from github_api import GitHub
+from variants import BUILD_PROFILE
 
 
 UPSTREAM = "PimpinPumpkin/Vela"
@@ -42,7 +43,7 @@ def fingerprints(release):
          for asset in release["assets"]],
         key=lambda asset: asset["name"],
     )
-    build = digest({"id": release["id"], "sha": release["sha"], "assets": assets})
+    build = digest({"id": release["id"], "sha": release["sha"], "assets": assets, "profile": BUILD_PROFILE})
     metadata = digest({key: release[key] for key in ("name", "prerelease", "updated_at")})
     return build, metadata
 

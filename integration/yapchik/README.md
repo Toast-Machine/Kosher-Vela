@@ -1,0 +1,47 @@
+# Yapchik integration
+
+This directory is independent of `scripts/policy.py`. `scripts/variants.py` applies
+the Kosher policy before Yapchik instrumentation when both features are selected.
+
+## Components
+
+- `vendor/yapchik`: pinned upstream library, license, notices, and our Gradle adapter.
+  `vendor-lock.json` verifies upstream file digests before and after integration,
+  using canonical LF text so Windows checkout conversion cannot invalidate CI hashes.
+- `tools/KotlinSyntax.java`: Kotlin compiler PSI syntax/argument/lambda/loop discovery.
+  `parser-lock.json` pins the compiler dependencies and verifies cached/downloaded jars.
+- `runtime`: Compose action registration, current original handlers/presentation,
+  clipped bounds, ownership, native-window suppression, softkeys, and Options UI.
+- `tests`: pure JVM action-store tests, also copied into customized app unit tests.
+
+`scripts/yapchik.py` instruments supported Material controls and activation modifiers,
+captures original text/icons/state without replaying content lambdas, and wraps repeated
+and custom composable call sites with identity scopes. Separate composition instances
+prevent duplicate logical item IDs from overwriting each other. Recognized unsupported
+patterns generate a coverage report and fail closed; this is not semantic coverage of
+arbitrary Kotlin or every possible future UI toolkit.
+
+Known app adapters cover the Activity root, Search activation, persistent map ownership,
+blocking panel content, and the settings entry. Upstream changes to these require review.
+Gesture-only controls and map-key redesign are excluded. Touch controls remain visible;
+the future hide-buttons feature needs explicit layout-independent eligibility tests.
+
+## Validation
+
+Run from the automation repository with Python and Java/Javac 17 or newer:
+
+```text
+python -m unittest discover -s tests -v
+python scripts/test_yapchik_runtime.py
+python scripts/yapchik.py path/to/fresh/upstream
+```
+
+Use a fresh checkout per customization; instrumentation refuses reapplication. Compiler
+and test jars are downloaded into ignored `.private` caches with SHA-256 verification.
+Release CI runs `:app:testDebugUnitTest` and `:app:assembleRelease` for each variant.
+
+Local runtime/library compilation and fresh-source instrumentation have passed. Complete
+Android APK compilation and physical/emulated keypad acceptance remain outstanding;
+parser validation alone is not a successful Android build. Test native windows,
+sheet ownership, clipped/scrolled rows, key calibration, D-pad focus, lifecycle transitions,
+and theme/insets on representative small displays before accepting the device behavior.

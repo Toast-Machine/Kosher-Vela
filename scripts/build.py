@@ -12,11 +12,8 @@ from pathlib import Path
 from urllib.parse import quote
 
 from github_api import GitHub
-from policy import apply, verify
 from sync import DESTINATION, UPSTREAM, current_release, write_json
-
-
-PACKAGE = "app.vela.kosher"
+from variants import VARIANTS, customize, verify_variant
 
 
 def verify_signer(certificates, expected):
@@ -71,7 +68,7 @@ def apk_info(path):
     return {"package": match[1], "version_code": int(match[2]), "version_name": match[3]}
 
 
-def prepare(api, item, root):
+def prepare(api, item, root, variant="kosher"):
     release, item = current_release(api, item)
     apk_assets = [asset for asset in release["assets"] if asset["name"].lower().endswith(".apk")]
     universal = [asset for asset in apk_assets if not re.search(r"-(armv7|arm64|x86|x86_64)\.apk$", asset["name"])]
@@ -83,7 +80,7 @@ def prepare(api, item, root):
     version = apk_info(upstream_apk)
     if version["package"] != "app.vela":
         raise RuntimeError("Unexpected upstream APK package; review before building")
-    apply(root)
+    customize(root, variant)
     gradle = (root / "app/build.gradle.kts").read_text(encoding="utf-8")
     runtime = re.search(r'implementation\(files\("libs/(sherpa-onnx-[^"/]+\.aar)"\)\)', gradle)
     cronet = re.search(r"^vela\.cronetVersion=(\S+)", (root / "gradle.properties").read_text(), re.M)
@@ -117,23 +114,32 @@ def prepare(api, item, root):
     if not match:
         raise RuntimeError("Cannot read the permanent signing certificate")
     signer = hashlib.sha256(base64.b64decode(match[1])).hexdigest()
-    with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as output:
-        output.write(f"VELA_KEYSTORE_PATH={keystore_path}\n")
-        output.write(f"APP_VERSION_NAME={version['version_name']}\n")
-        output.write(f"APP_VERSION_CODE={version['version_code']}\n")
-        output.write(f"EXPECTED_SIGNER_SHA256={signer}\n")
-    write_json("out/build-info.json", {
-        **item, **version, "package": PACKAGE, "upstream_repository": UPSTREAM,
+    environment = {
+        "VELA_KEYSTORE_PATH": str(keystore_path.resolve()), "APP_VERSION_NAME": version["version_name"],
+        "APP_VERSION_CODE": str(version["version_code"]), "EXPECTED_SIGNER_SHA256": signer,
+        "APP_PACKAGE": VARIANTS[variant]["package"],
+    }
+    os.environ.update(environment)
+    if os.environ.get("GITHUB_ENV"):
+        with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as output:
+            output.writelines(f"{key}={value}\n" for key, value in environment.items())
+    info = {
+        **item, **version, "package": VARIANTS[variant]["package"], "variant": variant,
+        "features": VARIANTS[variant], "upstream_repository": UPSTREAM,
         "upstream_apk_sha256": hashlib.sha256(upstream_apk.read_bytes()).hexdigest(),
         "runtime_files": runtime_files, "automation_sha": os.environ["GITHUB_SHA"],
         "locked_settings": {"show_reviews": False, "live_reviews_panel": False,
-                            "load_photos": False, "hide_external_links": True},
-    })
+                            "load_photos": False, "hide_external_links": True} if VARIANTS[variant]["kosher"] else {},
+    }
+    if VARIANTS[variant]["yapchik"]:
+        info["yapchik"] = json.loads((root / "yapchik-coverage.json").read_text())
+    write_json(f"out/{variant}-build-info.json", info)
+    return info
 
 
-def package(root):
-    verify(root)
-    info = json.loads(Path("out/build-info.json").read_text())
+def package(root, variant="kosher"):
+    verify_variant(root, variant)
+    info = json.loads(Path(f"out/{variant}-build-info.json").read_text())
     apks = list((root / "app/build/outputs/apk/release").glob("*.apk"))
     if len(apks) != 1:
         raise RuntimeError("Expected exactly one universal release APK")
@@ -149,29 +155,66 @@ def package(root):
     target = Path("out/assets")
     target.mkdir(parents=True, exist_ok=True)
     safe_tag = re.sub(r"[^A-Za-z0-9._-]", "_", info["tag"])
-    apk = target / f"kosher-vela-{safe_tag}.apk"
+    apk = target / f"{variant}-vela-{safe_tag}.apk"
     shutil.copyfile(apks[0], apk)
     info["apk_sha256"] = hashlib.sha256(apk.read_bytes()).hexdigest()
-    write_json(target / "kosher-build.json", info)
-    write_json(root / "KOSHER_BUILD.json", info)
-    (root / "KOSHER_BUILD.md").write_text(
-        "# Kosher Vela\n\nThis source snapshot is modified from " + UPSTREAM + ".\n\n"
-        "Reviews, full-review panels and photos are permanently disabled. External place links "
-        "are permanently hidden. The four controls and their settings-search entries are removed, "
-        "including Privacy and onboarding. Popular-times retries and adult-category filtering "
-        "remain configurable. The package is app.vela.kosher and APK updates use " + DESTINATION + ".\n\n"
-        "The upstream documentation describes upstream behavior; KOSHER_BUILD.json records "
-        "this variant's exact source revision, policy, dependencies and version arguments.\n",
+    write_json(target / f"{variant}-build.json", info)
+    write_json(root / "VARIANT_BUILD.json", info)
+    (root / "VARIANT_BUILD.md").write_text(
+        f"# Vela: {variant}\n\nModified from {UPSTREAM}. Package: {info['package']}.\n\n"
+        f"Kosher policy: {VARIANTS[variant]['kosher']}. Yapchik softkeys: {VARIANTS[variant]['yapchik']}.\n"
+        f"Updates use {DESTINATION} and only this variant's APKs.\n\n"
+        "VARIANT_BUILD.json records exact source, features, dependencies and build arguments.\n",
         encoding="utf-8",
     )
     subprocess.run(["git", "add", "-A"], cwd=root, check=True)
     subprocess.run(["git", "add", "-f", "app/libs", "core/libs"], cwd=root, check=True)
     tree = subprocess.check_output(["git", "write-tree"], cwd=root, text=True).strip()
-    source = (target / f"kosher-vela-{safe_tag}-source.tar.gz").resolve()
+    source = (target / f"{variant}-vela-{safe_tag}-source.tar.gz").resolve()
     subprocess.run(["git", "archive", "--format=tar.gz", "--output=" + str(source), tree], cwd=root, check=True)
+    info["source_sha256"] = hashlib.sha256(source.read_bytes()).hexdigest()
+    write_json(target / f"{variant}-build.json", info)
     checksum_lines = [hashlib.sha256(path.read_bytes()).hexdigest() + "  " + path.name
-                      for path in sorted(target.iterdir()) if path.is_file()]
+                      for path in sorted(target.iterdir()) if path.is_file() and path.name != "SHA256SUMS"]
     (target / "SHA256SUMS").write_text("\n".join(checksum_lines) + "\n", encoding="utf-8")
+
+
+def build_variants(api, item, root):
+    infos = []
+    for variant in VARIANTS:
+        source = Path("out/sources") / variant
+        if source.exists():
+            raise RuntimeError("Refusing to reuse a potentially customized source tree: " + str(source))
+        subprocess.run(["git", "clone", "--no-hardlinks", str(root.resolve()), str(source)], check=True)
+        subprocess.run(["git", "checkout", "--detach", item["sha"]], cwd=source, check=True)
+        info = prepare(api, item, source, variant)
+        wrapper = "gradlew.bat" if os.name == "nt" else "./gradlew"
+        if os.name != "nt":
+            (source / "gradlew").chmod(0o755)
+        tasks = [":app:testDebugUnitTest", ":app:assembleRelease"]
+        subprocess.run([
+            wrapper, *tasks, "--no-daemon", "-PappId=" + info["package"],
+            "-PappVersionName=" + info["version_name"], "-PappVersionCode=" + str(info["version_code"]),
+        ], cwd=source, check=True, env={**os.environ, "VELA_KEY_ALIAS": "kosher-vela"})
+        package(source, variant)
+        infos.append(info)
+    write_json("out/build-info.json", {"variants": infos})
+
+
+def validate_assets(directory, item):
+    directory = Path(directory)
+    for variant, features in VARIANTS.items():
+        path = directory / f"{variant}-build.json"
+        info = json.loads(path.read_text())
+        if info["variant"] != variant or info["package"] != features["package"] or info["sha"] != item["sha"]:
+            raise RuntimeError("Incorrect variant provenance: " + variant)
+        safe_tag = re.sub(r"[^A-Za-z0-9._-]", "_", item["tag"])
+        apk = directory / f"{variant}-vela-{safe_tag}.apk"
+        source = directory / f"{variant}-vela-{safe_tag}-source.tar.gz"
+        if (not source.is_file() or not apk.is_file()
+                or hashlib.sha256(apk.read_bytes()).hexdigest() != info["apk_sha256"]
+                or hashlib.sha256(source.read_bytes()).hexdigest() != info["source_sha256"]):
+            raise RuntimeError("Incomplete two-variant release: " + variant)
 
 
 def gh(*arguments):
@@ -185,14 +228,15 @@ def publish(api, item):
         if not destination or destination["draft"]:
             raise RuntimeError("Cannot update metadata without a published customized build")
         body = upstream["body"] or ""
-        body += "\n\n---\nKosher Vela (`app.vela.kosher`). Reviews and photos disabled; external place links hidden.\n"
+        body += variant_description()
         api.request(f"repos/{DESTINATION}/releases/{destination['id']}", {
             "name": fresh["name"], "body": body, "prerelease": fresh["prerelease"], "make_latest": "false",
         }, method="PATCH")
     else:
-        info = json.loads(Path("out/build-info.json").read_text())
+        validate_assets("out/assets", item)
+        info = json.loads(Path("out/build-info.json").read_text())["variants"][0]
         body = (upstream["body"] or "") + (
-            "\n\n---\nKosher Vela (`app.vela.kosher`). Reviews and photos disabled; external place links hidden.\n"
+            variant_description() +
             f"\nversionName: {info['version_name']}\nversionCode: {info['version_code']}\n"
             f"\nUpstream source: `{item['sha']}`. Patched source and build provenance are attached.\n"
         )
@@ -203,6 +247,8 @@ def publish(api, item):
                 "name": fresh["name"], "body": body, "draft": True,
                 "prerelease": fresh["prerelease"], "make_latest": "false",
             })
+        elif not destination["draft"]:
+            api.request(f"repos/{DESTINATION}/releases/{destination['id']}", {"draft": True}, method="PATCH")
         paths = [str(path) for path in Path("out/assets").iterdir() if path.is_file()]
         gh("release", "upload", item["tag"], *paths, "--clobber")
         upstream, fresh = current_release(api, item)
@@ -214,16 +260,27 @@ def publish(api, item):
     print("Published " + item["tag"])
 
 
+def variant_description():
+    return (
+        "\n\n---\nTwo separately installable builds:\n"
+        "- Kosher (`app.vela.kosher`): locked content policy and Yapchik hardware softkeys.\n"
+        "- Yapchik (`app.vela.yapchik`): hardware softkeys, ordinary upstream content settings.\n"
+    )
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["prepare", "package", "publish"])
+    parser.add_argument("command", choices=["prepare", "package", "variants", "publish"])
     parser.add_argument("--source", type=Path, default=Path("upstream"))
+    parser.add_argument("--variant", choices=VARIANTS, default="kosher")
     args = parser.parse_args()
     if args.command == "package":
-        package(args.source)
+        package(args.source, args.variant)
     else:
         item = json.loads(os.environ["RELEASE_JSON"])
         if args.command == "prepare":
-            prepare(GitHub(), item, args.source)
+            prepare(GitHub(), item, args.source, args.variant)
+        elif args.command == "variants":
+            build_variants(GitHub(), item, args.source)
         else:
             publish(GitHub(), item)

@@ -1,7 +1,35 @@
 # Yapchik integration plan
 
-Status: agreed design; not implemented. This document records the plan, not
-authorization to implement it.
+Status: implemented on the local `Yapchik` branch; Android APK and device acceptance
+validation remain outstanding. The design below is retained as the acceptance contract.
+
+## Implementation status
+
+- `scripts/yapchik.py` instruments customized source through Kotlin compiler PSI 2.1.20,
+  validates generated syntax before replacing files, and writes `yapchik-coverage.json`.
+  Recognized unsupported patterns fail the build for review.
+- `integration/yapchik/runtime` supplies lifecycle-aware action references, original-site
+  callback/state capture, live clipped bounds, ownership, and the themed D-pad Options
+  overlay. Native Dialog/Popup windows suppress underlying bindings.
+- Yapchik revision `bf5021c648ae6adff60644a7cf2633c938d70ead` is vendored with its
+  license/notices and digest lock, independently of the Kosher policy.
+- Repeated lazy/list/for-loop controls include item scopes and separate composition
+  instance identities, including duplicate item IDs. Custom composable call sites
+  also contribute scopes. Multiple activations sharing a control require adapter review.
+- `scripts/variants.py` supports neither/either/both features internally. Releases build
+  Kosher with Yapchik (`app.vela.kosher`) and Yapchik-only (`app.vela.yapchik`) from
+  isolated exact-commit trees, run app unit tests, verify package/version/signature,
+  and require both sets of assets. The Kosher-only release and separate combined
+  package have been removed; existing Kosher installations gain Yapchik in place.
+- Local checks cover parser fixtures, variants, updater isolation, publication
+  prerequisites, and Kotlin action-store behavior. Runtime plus vendored library compile
+  against real Android/Compose artifacts. Fresh upstream integration discovers 344
+  controls in both Yapchik variants with no recognized unsupported cases.
+- Full Android Gradle/APK compilation is not locally verified because the Android SDK
+  is missing. Small-screen insets, key profiles/calibration, touch behavior, and device
+  focus acceptance tests are not yet performed. CI must pass before release.
+
+The actual hide-buttons option and map-control changes remain deferred.
 
 ## Agreed behavior
 
@@ -32,8 +60,10 @@ Keep the library, application bridge, instrumentation, configuration, and tests
 separate from kashering. Neither feature may depend on the other.
 
 Support applying neither feature, Yapchik only, kashering only, or both. This is
-feature modularity, not a request for extra release channels or signing/updater
-changes. When both are selected, apply existing customization patches first and
+feature modularity. The revised implementation request specifies two release variants,
+both with Yapchik, using distinct package IDs and variant-isolated updater selection,
+retaining the existing
+signing key. When both are selected, apply existing customization patches first and
 instrument the resulting source. Use a separate integration entry point called by
 the build orchestrator, not transformations inside `scripts/policy.py`.
 
@@ -178,7 +208,8 @@ Required validation:
 
 Handle upstream tooling/library changes and newly unsupported mechanisms when
 encountered. Do not promise maintenance-free support for arbitrary future source.
-This document changes no app code, workflow behavior, or releases.
+The implementation changes customization and release workflows. Published APKs require
+the release workflow to pass; local source/parser validation does not publish builds.
 
 ## Design references
 
