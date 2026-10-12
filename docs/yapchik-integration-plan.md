@@ -1,7 +1,7 @@
 # Yapchik integration plan
 
 Status: implemented on the `Yapchik` branch; the signed `v0.5.2493` APK from
-`d41a771` passed CI and Options/Search device regression checks on a Sonim X320.
+`0b16b49` passed CI and Options device regression checks on a Sonim X320.
 The design below is retained as the acceptance contract.
 
 ## Implementation status
@@ -28,7 +28,7 @@ The design below is retained as the acceptance contract.
   against real Android/Compose artifacts. Fresh upstream integration instruments 347
   controls in the combined build with no recognized unsupported cases.
 - Full Android Gradle/APK compilation and publication passed in GitHub Actions run
-  `38195520599`; the Android SDK is not installed locally. Device checks verified
+  `38197530960`; the Android SDK is not installed locally. Device checks verified
   vendor and standard left softkeys, repeated Options activation, on-screen Options,
   D-pad focus and Settings activation, Back dismissal, and right-softkey Search.
   The installed APK checksum matched publication provenance, diagnostics were off,
@@ -40,8 +40,12 @@ The design below is retained as the acceptance contract.
   capturing its original `onOk` callback; its P icon appears and receives D-pad
   focus in Options. Parking activation was not exercised to avoid saving a test
   parking location. Original tap/long-press/key handlers remain unchanged, and a
-  changed adapter shape fails build-time validation. Local tests pass: 60 Python
-  tests and 15 Kotlin tests.
+  changed adapter shape fails build-time validation.
+- The follow-up accessibility labeling change passed 60 Python and 21 Kotlin tests,
+  real Compose compilation, and the signed release build. Device checks confirmed
+  existing descriptions display as labels in Map and Settings Options, including
+  Save parking spot, Center on my location, and Back. Existing category text remains
+  unchanged; D-pad scrolling and Settings activation passed without crash entries.
 
 Options uses an idempotent open command because a device can emit multiple Yapchik
 key aliases for one softkey press. Yapchik still owns profile resolution and dispatch;
