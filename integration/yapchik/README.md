@@ -42,6 +42,13 @@ Yapchik profile under `VelaYapchikKeys`; every event is delegated unchanged to Y
 Normal builds disable this observer. Diagnostic provenance is rejected by the release
 publication gate. Replace the diagnostic APK with a normal build after testing.
 
+The Options binding opens the menu idempotently rather than toggling it. Some ROMs
+emit both a vendor softkey and a synthetic MENU press for one physical press; both
+are valid left-slot events in Yapchik's universal profile. Repeated open requests
+must leave Options open. Back dismisses it. No phone-specific numeric key mapping
+or replacement key handler is needed. A normal manual workflow run can set
+`release_tag` to rebuild and publish one existing tag before rebuilding the backlog.
+
 Run from the automation repository with Python and Java/Javac 17 or newer:
 
 ```text

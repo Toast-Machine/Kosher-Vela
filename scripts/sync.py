@@ -116,12 +116,13 @@ def pending_releases(releases, state):
 
 
 def planned_releases(releases, state):
-    if os.environ.get("YAPCHIK_DIAGNOSTICS") != "true":
+    tag = os.environ.get("RELEASE_TAG_FILTER", "").strip()
+    diagnostic = os.environ.get("YAPCHIK_DIAGNOSTICS") == "true"
+    if not tag and not diagnostic:
         return pending_releases(releases, state)
-    tag = os.environ.get("DIAGNOSTIC_RELEASE_TAG", "").strip()
     selected = [release for release in releases if release["tag"] == tag]
     if not tag or len(selected) != 1:
-        raise RuntimeError("Diagnostics require exactly one existing upstream app release tag")
+        raise RuntimeError("Targeted builds require exactly one existing upstream app release tag")
     return [{**selected[0], "kind": "build"}]
 
 

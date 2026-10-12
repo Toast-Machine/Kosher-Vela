@@ -20,9 +20,9 @@ on:
         type: boolean
         default: false
       release_tag:
-        description: Existing upstream release tag to use for key diagnostics
+        description: Rebuild one existing upstream tag, or leave blank for normal release polling
         type: string
-        default: v0.5.2493
+        default: ''
   repository_dispatch:
     types: [upstream-release]
 
@@ -32,7 +32,7 @@ permissions:
 env:
   RELEASE_STATE_BRANCH: ${{ github.ref_name }}
   YAPCHIK_DIAGNOSTICS: ${{ github.event_name == 'workflow_dispatch' && inputs.key_diagnostics && 'true' || 'false' }}
-  DIAGNOSTIC_RELEASE_TAG: ${{ inputs.release_tag }}
+  RELEASE_TAG_FILTER: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || '' }}
 
 concurrency:
   group: ${{ github.event_name == 'workflow_dispatch' && inputs.key_diagnostics && format('vela-key-diagnostics-{0}', github.ref_name) || 'vela-release-sync' }}

@@ -266,6 +266,12 @@ import androidx.compose.runtime.Composable
         self.assertIn("items(entries, key = { store.lazyKey(it.identity) })", source)
         self.assertNotIn("items(entries, key = { it.identity })", source)
 
+    def test_options_binding_opens_idempotently_for_aliased_key_events(self):
+        source = (INTEGRATION / "runtime/YapchikRuntime.kt").read_text(encoding="utf-8")
+        self.assertIn('left("Options") { menuOpen = true }', source)
+        self.assertNotIn('left("Options") { menuOpen = !menuOpen }', source)
+        self.assertIn("BackHandler(onBack = dismiss)", source)
+
     def test_key_diagnostics_are_opt_in_and_delegate_to_yapchik(self):
         source = (INTEGRATION / "runtime/KeyDiagnostics.kt").read_text(encoding="utf-8")
         self.assertIn("val handled = wrapped.dispatchKeyEvent(event)", source)

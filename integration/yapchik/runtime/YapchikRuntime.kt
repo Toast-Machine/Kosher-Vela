@@ -288,7 +288,7 @@ fun YapchikHost(content: @Composable () -> Unit) {
             noDefaults()
             screenMode = if (active && foreground && !store.suppressed) SoftkeyMode.ON else SoftkeyMode.OFF
             if (active && foreground && !store.suppressed) {
-                left("Options") { menuOpen = !menuOpen }
+                left("Options") { menuOpen = true }
                 if (search != null) right("Search") { store.dispatch(search.identity) { menuOpen = false } }
             }
         }

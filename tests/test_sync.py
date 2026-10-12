@@ -34,18 +34,25 @@ class ReleaseTrackingTests(unittest.TestCase):
         state = initial_state(releases)
         state["completed"] = {item["id"]: item.copy() for item in releases}
         original = copy.deepcopy(state)
-        with patch.dict(os.environ, {"YAPCHIK_DIAGNOSTICS": "true", "DIAGNOSTIC_RELEASE_TAG": releases[1]["tag"]}):
+        with patch.dict(os.environ, {"YAPCHIK_DIAGNOSTICS": "true", "RELEASE_TAG_FILTER": releases[1]["tag"]}):
             self.assertEqual([{**releases[1], "kind": "build"}], planned_releases(releases, state))
         self.assertEqual(original, state)
-        with patch.dict(os.environ, {"YAPCHIK_DIAGNOSTICS": "false"}):
+        with patch.dict(os.environ, {"YAPCHIK_DIAGNOSTICS": "false", "RELEASE_TAG_FILTER": ""}):
             self.assertEqual([], planned_releases(releases, state))
 
     def test_diagnostics_reject_missing_or_unknown_release_tag(self):
         releases = [release(1)]
         for tag in ("", "unknown"):
-            with patch.dict(os.environ, {"YAPCHIK_DIAGNOSTICS": "true", "DIAGNOSTIC_RELEASE_TAG": tag}):
+            with patch.dict(os.environ, {"YAPCHIK_DIAGNOSTICS": "true", "RELEASE_TAG_FILTER": tag}):
                 with self.assertRaisesRegex(RuntimeError, "existing upstream app release"):
                     planned_releases(releases, initial_state(releases))
+
+    def test_targeted_normal_build_rebuilds_only_selected_tag(self):
+        releases = [release(1), release(2)]
+        state = initial_state(releases)
+        state["completed"] = {item["id"]: item.copy() for item in releases}
+        with patch.dict(os.environ, {"YAPCHIK_DIAGNOSTICS": "false", "RELEASE_TAG_FILTER": releases[0]["tag"]}):
+            self.assertEqual([{**releases[0], "kind": "build"}], planned_releases(releases, state))
 
     def test_state_branch_defaults_to_main_and_accepts_branch_override(self):
         with patch.dict(os.environ, {}, clear=True):
