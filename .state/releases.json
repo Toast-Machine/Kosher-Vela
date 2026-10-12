@@ -42,7 +42,7 @@
     "407163615": {
       "tag": "v0.5.2444",
       "source_sha": "4c2dad1fd16404574c95c6daa0f2d6e600c1b728",
-      "build_fingerprint": "d7f1eabd47ccf292e52ebe180325ba4e4d4e178a70a643898ae43630c1d71618",
+      "build_fingerprint": "089ed79ba08b4ef0f5c83a84c7b3032920cecf59af8181f0373af05f927211cc",
       "metadata_fingerprint": "f44953f5eb8ad37689bfd1d17900a3ed5064df72ac69a3ea0bf4c3fbf390f9c9"
     },
     "406007530": {
@@ -66,7 +66,7 @@
     "408154876": {
       "tag": "v0.5.2459",
       "source_sha": "2b3f007a924fc9559d62bee9b4574cb880b41f50",
-      "build_fingerprint": "42da1e23ed4cae7fc57649ddd282d8fb8f5de5a266de31d09709ec3faca0fac5",
+      "build_fingerprint": "f57ec8547f7a738e597933c55cf31ddba467be774c515ae751cb54276e806bcc",
       "metadata_fingerprint": "b5201436bc03acb2b0a71389b671f214da13a583075ce7fae85b08f31ca69ec0"
     },
     "408407005": {
@@ -96,7 +96,7 @@
     "409051564": {
       "tag": "v0.5.2484",
       "source_sha": "ce1c9a2a0f9593aa6e6d4de02798911e8b1f6b62",
-      "build_fingerprint": "781e53ac2ca6bddd174e644b46e681a37163fb6b4451c81d66985c11653dbc90",
+      "build_fingerprint": "1e90b4a285c879fe12fcd32c853dc3dc7663afbf4d834402098043b44cc89243",
       "metadata_fingerprint": "21083916944372dcf7ed3862c6583e74d99dc01601dbb944addd8e566e0d2c81"
     },
     "409199840": {
@@ -120,7 +120,7 @@
     "409938158": {
       "tag": "canary",
       "source_sha": "078b276294699d8b9a70f97f0f6dacde88ebdc6c",
-      "build_fingerprint": "8c68bf20992221c52c0e0695273a1c9c55c28e072f05ec0031083044de9d9640",
+      "build_fingerprint": "2a00095315681c426d49ce975ee64d6432d4d7ae8cdc739b1bdfa64a44c6d0f1",
       "metadata_fingerprint": "bfe23954be09fa5a7eb6ab18a808aa498ea67830287ccdebae398800cc2cc82f"
     }
   },
