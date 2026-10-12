@@ -36,7 +36,7 @@
     "407070302": {
       "tag": "v0.5.2435",
       "source_sha": "9f8b684779c36debdd3ea8940091e0beeeb6be5a",
-      "build_fingerprint": "fcce654aa4d68304a4068adfd86fabb2e3aa24d5ff2abcec68d69c20b48585f9",
+      "build_fingerprint": "6dd3f073ba2c180bdba86cd7608bfa4e7891f5dd85e2457a2caf5c7c7f3c6151",
       "metadata_fingerprint": "3129bcab43b4607536fba7b86235a6cf4291b22a66764e10380391b18f53114e"
     },
     "407163615": {
@@ -48,13 +48,13 @@
     "406007530": {
       "tag": "v0.4.2373",
       "source_sha": "6daa576f7242cb3c6189afdb2044c44396019385",
-      "build_fingerprint": "79a86b8bdb48c2ffb06dcb3e2864f387740ca6977a61eb85bb36918ce4681846",
+      "build_fingerprint": "bfe749af27cb327042723e28dd05c9b04056d1e9627e86de63a4959cd085e711",
       "metadata_fingerprint": "f104bc5f4629bc701ca82658e913ab72bfeecb7898157e8c87ecd6495a8bd13f"
     },
     "406942601": {
       "tag": "v0.5.2426",
       "source_sha": "163d4699150e8bc0cb236a99b56305506a758236",
-      "build_fingerprint": "cd8144d1296a7c112ea3f367b046ed451e46941688a056d4a46d5a462343f95d",
+      "build_fingerprint": "abd73f1a7223f77ca0d6b359ca496bbe7510e2768063f8f7ac13b5e5454a3555",
       "metadata_fingerprint": "fd9c4d32ca308c61d4e4d49585a3d46f015ba2616d656b85685c2c3377759f89"
     },
     "407341870": {
