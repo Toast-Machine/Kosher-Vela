@@ -65,8 +65,10 @@ to the right softkey**. Do not duplicate that action in Options. Options never m
 to the right. Other distinct search actions are not excluded merely by their name.
 Search invokes the original control's current handler.
 
-Keep existing on-screen controls initially. Icon-only controls produce icon-only
-entries, retaining accessibility descriptions without requiring visible labels.
+Keep existing on-screen controls initially. Per the follow-up labeling request,
+icon-only menu entries display their existing nonblank accessibility descriptions
+as text labels. Existing text labels take precedence; descriptions are not invented
+where none exist, and a description rendered as text is not repeated on its icon.
 Text controls retain text; controls with both retain both. Non-interactive text,
 images, and decorations are not actions.
 

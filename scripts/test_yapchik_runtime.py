@@ -43,13 +43,15 @@ def main():
             "java", "-cp", classpath, "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler",
             "-no-stdlib", "-no-reflect", "-jvm-target", "17", "-classpath", classpath,
             "-d", classes, str(INTEGRATION / "runtime/ActionStore.kt"),
+            str(INTEGRATION / "runtime/MenuPresentation.kt"),
             str(INTEGRATION / "tests/ActionStoreTest.kt"),
+            str(INTEGRATION / "tests/MenuPresentationTest.kt"),
             str(source), str(INTEGRATION / "compiler-fixtures/ComposeAnnotation.kt"),
             str(INTEGRATION / "compiler-fixtures/ItemScope.kt"),
         ], check=True)
         subprocess.run([
             "java", "-cp", classes + os.pathsep + classpath,
-            "org.junit.runner.JUnitCore", "app.vela.yapchik.ActionStoreTest",
+            "org.junit.runner.JUnitCore", "app.vela.yapchik.ActionStoreTest", "app.vela.yapchik.MenuPresentationTest",
         ], check=True)
 
 

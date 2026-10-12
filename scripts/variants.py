@@ -6,7 +6,7 @@ from policy import UPDATER, apply, verify
 VARIANTS = {
     "kosher": {"package": "app.vela.kosher", "kosher": True, "yapchik": True},
 }
-BUILD_PROFILE = "kosher-with-yapchik-v5"
+BUILD_PROFILE = "kosher-with-yapchik-v6"
 
 
 def configure_updater(root, variant):

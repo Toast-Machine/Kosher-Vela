@@ -27,7 +27,6 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -40,12 +39,6 @@ import com.theonionsarewatching.yapchik.SoftkeyMode
 import com.theonionsarewatching.yapchik.Softkeys
 import com.theonionsarewatching.yapchik.Yapchik
 import com.theonionsarewatching.yapchik.YapchikSettingsDialog
-
-sealed interface ActionVisual {
-    data class Label(val text: String) : ActionVisual
-    data class Glyph(val value: Any, val description: String?) : ActionVisual
-    data class Toggle(val kind: String) : ActionVisual
-}
 
 private val LocalStore = staticCompositionLocalOf<ActionStore<ActionVisual>?> { null }
 private val LocalOwner = staticCompositionLocalOf<Any?> { null }
@@ -346,13 +339,13 @@ private fun OptionsMenu(store: ActionStore<ActionVisual>, dismiss: () -> Unit) {
                     Surface(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
                             .clickable(enabled = reference.enabled) { store.dispatch(reference.identity, dismiss) }
-                            .semantics { reference.selected?.let { selected = it } },
+                            .semantics(mergeDescendants = true) { reference.selected?.let { selected = it } },
                         border = if (highlighted) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
                         color = if (highlighted) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface,
                         contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (reference.enabled) 1f else 0.38f),
                     ) {
                         Row(Modifier.padding(10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            for (visual in reference.presentation) when (visual) {
+                            for (visual in menuPresentation(reference.presentation)) when (visual) {
                                 is ActionVisual.Label -> Text(visual.text)
                                 is ActionVisual.Glyph -> when (val icon = visual.value) {
                                     is ImageVector -> Icon(icon, visual.description)

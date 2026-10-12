@@ -56,6 +56,11 @@ the existing `onOk` callback and original icon at the control site. Original tap
 long-press, and keyboard handlers remain unchanged. An unexpected Parking control
 shape or activation fails coverage validation rather than guessing a new handler.
 
+Options renders existing icon accessibility descriptions as visible text when an
+entry has no text label. Text-labeled entries retain their original presentation;
+unlabeled controls without descriptions receive no invented names. Rows merge
+descendant semantics, and fallback labels are not duplicated on their icons.
+
 Run from the automation repository with Python and Java/Javac 17 or newer:
 
 ```text
