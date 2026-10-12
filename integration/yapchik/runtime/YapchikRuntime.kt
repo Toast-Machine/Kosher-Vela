@@ -8,22 +8,26 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +36,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -39,6 +46,7 @@ import com.theonionsarewatching.yapchik.SoftkeyMode
 import com.theonionsarewatching.yapchik.Softkeys
 import com.theonionsarewatching.yapchik.Yapchik
 import com.theonionsarewatching.yapchik.YapchikSettingsDialog
+import kotlin.math.ceil
 
 private val LocalStore = staticCompositionLocalOf<ActionStore<ActionVisual>?> { null }
 private val LocalOwner = staticCompositionLocalOf<Any?> { null }
@@ -312,7 +320,7 @@ private fun OptionsMenu(store: ActionStore<ActionVisual>, dismiss: () -> Unit) {
         if (index >= 0) { previousIndex = index; scroll.scrollToItem(index) }
     }
     BackHandler(onBack = dismiss)
-    Surface(Modifier.fillMaxSize().focusRequester(requester).onPreviewKeyEvent { event ->
+    val menuKeys = Modifier.focusRequester(requester).onPreviewKeyEvent { event ->
         val native = event.nativeKeyEvent
         if (native.action != KeyEvent.ACTION_DOWN) false else when (native.keyCode) {
             KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN -> {
@@ -329,33 +337,48 @@ private fun OptionsMenu(store: ActionStore<ActionVisual>, dismiss: () -> Unit) {
             }
             else -> false
         }
-    }.focusable()) {
-        Column(Modifier.safeDrawingPadding().padding(8.dp)) {
-            Text("Options", style = MaterialTheme.typography.titleMedium)
-            if (entries.isEmpty()) Text("No actions available")
-            LazyColumn(state = scroll) {
-                items(entries, key = { store.lazyKey(it.identity) }) { reference ->
-                    val highlighted = reference.identity == focused
-                    Surface(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
-                            .clickable(enabled = reference.enabled) { store.dispatch(reference.identity, dismiss) }
-                            .semantics(mergeDescendants = true) { reference.selected?.let { selected = it } },
-                        border = if (highlighted) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
-                        color = if (highlighted) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (reference.enabled) 1f else 0.38f),
-                    ) {
-                        Row(Modifier.padding(10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            for (visual in menuPresentation(reference.presentation)) when (visual) {
-                                is ActionVisual.Label -> Text(visual.text)
-                                is ActionVisual.Glyph -> when (val icon = visual.value) {
-                                    is ImageVector -> Icon(icon, visual.description)
-                                    is ImageBitmap -> Icon(icon, visual.description)
-                                    is Painter -> Icon(icon, visual.description)
-                                }
-                                is ActionVisual.Toggle -> when (visual.kind) {
-                                    "RadioButton" -> RadioButton(selected = reference.selected == true, onClick = null, enabled = reference.enabled)
-                                    "Switch" -> Switch(checked = reference.selected == true, onCheckedChange = null, enabled = reference.enabled)
-                                    else -> Checkbox(checked = reference.selected == true, onCheckedChange = null, enabled = reference.enabled)
+    }.focusable()
+    BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding().padding(8.dp)) {
+        Box(Modifier.fillMaxSize().clickable(
+            interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = dismiss,
+        ))
+        Surface(
+            modifier = Modifier.align(Alignment.BottomStart).width(maxWidth / 2).heightIn(max = maxHeight / 2).then(menuKeys),
+            shape = MaterialTheme.shapes.medium,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            shadowElevation = 6.dp,
+        ) {
+            Column(Modifier.padding(8.dp)) {
+                Text("Options", style = MaterialTheme.typography.titleMedium)
+                if (entries.isEmpty()) ScaleToMenuWidth { Text("No actions available", maxLines = 1, softWrap = false) }
+                LazyColumn(state = scroll, modifier = Modifier.weight(1f, fill = false)) {
+                    items(entries, key = { store.lazyKey(it.identity) }) { reference ->
+                        val highlighted = reference.identity == focused
+                        Surface(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
+                                .clickable(enabled = reference.enabled) { store.dispatch(reference.identity, dismiss) }
+                                .semantics(mergeDescendants = true) { reference.selected?.let { selected = it } },
+                            border = if (highlighted) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+                            color = if (highlighted) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (reference.enabled) 1f else 0.38f),
+                        ) {
+                            Box(Modifier.padding(10.dp)) {
+                                ScaleToMenuWidth {
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        for (visual in menuPresentation(reference.presentation)) when (visual) {
+                                            is ActionVisual.Label -> Text(visual.text, maxLines = 1, softWrap = false)
+                                            is ActionVisual.Glyph -> when (val icon = visual.value) {
+                                                is ImageVector -> Icon(icon, visual.description)
+                                                is ImageBitmap -> Icon(icon, visual.description)
+                                                is Painter -> Icon(icon, visual.description)
+                                            }
+                                            is ActionVisual.Toggle -> when (visual.kind) {
+                                                "RadioButton" -> RadioButton(selected = reference.selected == true, onClick = null, enabled = reference.enabled)
+                                                "Switch" -> Switch(checked = reference.selected == true, onCheckedChange = null, enabled = reference.enabled)
+                                                else -> Checkbox(checked = reference.selected == true, onCheckedChange = null, enabled = reference.enabled)
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -367,11 +390,22 @@ private fun OptionsMenu(store: ActionStore<ActionVisual>, dismiss: () -> Unit) {
 }
 
 @Composable
-fun YapchikPreferences() {
-    val activity = LocalContext.current.activity()
-    YapchikAction("yapchik-preferences", { YapchikSettingsDialog.show(activity) }) { action ->
-        TextButton(onClick = action.onClick, modifier = action.modifier) {
-            YapchikText("Hardware softkeys: mode and key calibration") { Text(it) }
+private fun ScaleToMenuWidth(content: @Composable () -> Unit) {
+    Layout(content = content) { measurables, constraints ->
+        val placeable = measurables.single().measure(constraints.copy(minWidth = 0, maxWidth = Constraints.Infinity, minHeight = 0))
+        val scale = menuContentScale(placeable.width, constraints.maxWidth)
+        val width = constraints.constrainWidth(ceil(placeable.width * scale).toInt())
+        val height = constraints.constrainHeight(ceil(placeable.height * scale).toInt())
+        layout(width, height) {
+            placeable.placeRelativeWithLayer(0, 0) {
+                scaleX = scale
+                scaleY = scale
+                transformOrigin = TransformOrigin(0f, 0f)
+            }
         }
     }
+}
+
+fun showYapchikPreferences(context: Context) {
+    YapchikSettingsDialog.show(context.activity())
 }

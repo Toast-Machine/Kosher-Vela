@@ -61,6 +61,13 @@ entry has no text label. Text-labeled entries retain their original presentation
 unlabeled controls without descriptions receive no invented names. Rows merge
 descendant semantics, and fallback labels are not duplicated on their icons.
 
+Options is constrained to half the available width and height, anchored at the
+bottom-start above system insets. The list scrolls and follows D-pad focus; overly
+wide rows scale their complete presentation uniformly rather than truncate labels.
+The Yapchik entry uses the upstream Settings hub's own themed `HubRow`, inserted
+directly after Appearance through a validated PSI anchor. It opens the existing
+Yapchik settings dialog; a changed insertion anchor fails coverage validation.
+
 Run from the automation repository with Python and Java/Javac 17 or newer:
 
 ```text

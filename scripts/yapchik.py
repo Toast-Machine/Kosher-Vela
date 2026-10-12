@@ -316,11 +316,17 @@ def edits_for_file(file, composables=None):
                 else:
                     wrap(call["full"], RUNTIME + "YapchikScope(active = !showSettings) { ", " }")
     if path.name == "SettingsHub.kt":
-        scaffold = [call for call in calls if call["callee"] == "SettingsScaffold" and call["lambdas"]]
-        if len(scaffold) != 1:
+        appearance = [call for call in calls if call["callee"] == "HubRow"
+                      and "R.string.settings_appearance" in text(source, argument(call, "title"))]
+        rows = [function for function in file["functions"] if function["name"] == "HubRow" and function["composable"]]
+        if len(appearance) != 1 or len(rows) != 1:
             report["unsupported"].append({"file": path.name, "reason": "Softkey settings insertion point changed"})
         else:
-            insert(scaffold[0]["lambdas"][0]["body"], RUNTIME + "YapchikPreferences()\n")
+            point = appearance[0]["full"][1]
+            insert([point, point], '\nval yapchikContext = androidx.compose.ui.platform.LocalContext.current\n'
+                   'HubRow(icon = app.vela.ui.icons.SymOutlined.Settings, title = "Yapchik", '
+                   'subtitle = "Hardware softkeys and key calibration", '
+                   'onClick = { ' + RUNTIME + 'showYapchikPreferences(yapchikContext) })\n')
     return rewrite(source, edits), report
 
 

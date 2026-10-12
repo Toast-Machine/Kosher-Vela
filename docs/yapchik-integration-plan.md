@@ -73,6 +73,11 @@ Keep existing on-screen controls initially. Per the follow-up labeling request,
 icon-only menu entries display their existing nonblank accessibility descriptions
 as text labels. Existing text labels take precedence; descriptions are not invented
 where none exist, and a description rendered as text is not repeated on its icon.
+Options is a bottom-start panel capped at half the available screen width and
+height, excluding system insets. Overflowing lists scroll; each overly wide option
+scales its complete icon/text/toggle presentation uniformly to fit without
+truncating labels. Outside taps and Back dismiss the panel. The Yapchik settings
+entry reuses the native Settings hub row and appears immediately below Appearance.
 Text controls retain text; controls with both retain both. Non-interactive text,
 images, and decorations are not actions.
 

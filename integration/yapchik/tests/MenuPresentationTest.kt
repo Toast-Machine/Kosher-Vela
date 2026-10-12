@@ -4,6 +4,29 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class MenuPresentationTest {
+    @Test fun wideOptionsScaleDownWithoutGrowingShortOptions() {
+        assertEquals(0.5f, menuContentScale(400, 200), 0f)
+        assertEquals(0.25f, menuContentScale(800, 200), 0f)
+        assertEquals(1f, menuContentScale(100, 200), 0f)
+        assertEquals(1f, menuContentScale(200, 200), 0f)
+    }
+
+    @Test fun emptyOrZeroWidthOptionsDoNotProduceInvalidScales() {
+        assertEquals(1f, menuContentScale(0, 200), 0f)
+        assertEquals(0f, menuContentScale(100, 0), 0f)
+        assertEquals(0f, menuContentScale(100, -1), 0f)
+    }
+
+    @Test fun scaledContentFitsPortraitLandscapeAndVeryNarrowWidths() {
+        for (available in listOf(1, 60, 120, 240, 427, 600)) {
+            for (content in listOf(1, 50, 120, 400, 1800)) {
+                val scale = menuContentScale(content, available)
+                assertTrue(scale in 0f..1f)
+                assertTrue(content * scale <= available + 0.001f)
+            }
+        }
+    }
+
     @Test fun iconDescriptionsBecomeVisibleAccessibleLabels() {
         val icon = Any()
         assertEquals(listOf(ActionVisual.Glyph(icon, null), ActionVisual.Label("Save parking")),

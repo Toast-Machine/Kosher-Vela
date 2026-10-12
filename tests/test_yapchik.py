@@ -140,6 +140,40 @@ import androidx.compose.runtime.Composable
         self.assertIn('content = {', source)
         self.assertIn('YapchikScope(blocking = true, suppress = true)', source)
 
+    def test_yapchik_settings_reuses_native_row_below_appearance(self):
+        source = '''package app.vela.ui.settings
+import androidx.compose.runtime.Composable
+@Composable fun SettingsHub() {
+    HubRow(title = stringResource(R.string.settings_appearance), onClick = {})
+    HubRow(title = stringResource(R.string.settings_map), onClick = {})
+}
+@Composable private fun HubRow(title: String, onClick: () -> Unit) {}
+'''
+        path = Path(self.directory.name) / 'SettingsHub.kt'
+        path.write_text(source, encoding='utf-8')
+        report = instrument([path], Path(self.directory.name) / 'settings-placement.json')
+        transformed = path.read_text(encoding='utf-8')
+        self.assertEqual([], report['unsupported'])
+        self.assertLess(transformed.index('R.string.settings_appearance'), transformed.index('title = "Yapchik"'))
+        self.assertLess(transformed.index('title = "Yapchik"'), transformed.index('R.string.settings_map'))
+        self.assertIn('HubRow(icon = app.vela.ui.icons.SymOutlined.Settings', transformed)
+        self.assertIn('showYapchikPreferences(yapchikContext)', transformed)
+        self.assertNotIn('YapchikPreferences()', transformed)
+
+    def test_changed_settings_hub_fails_closed(self):
+        path = Path(self.directory.name) / 'SettingsHub.kt'
+        path.write_text('package app.vela.ui.settings\nfun SettingsHub() {}', encoding='utf-8')
+        with self.assertRaisesRegex(RuntimeError, 'requiring review'):
+            instrument([path], Path(self.directory.name) / 'settings-changed.json')
+
+    def test_options_dimensions_and_overflow_remain_bounded(self):
+        source = (INTEGRATION / 'runtime/YapchikRuntime.kt').read_text(encoding='utf-8')
+        self.assertIn('.width(maxWidth / 2).heightIn(max = maxHeight / 2)', source)
+        self.assertIn('Modifier.weight(1f, fill = false)', source)
+        self.assertIn('for (visual in menuPresentation(reference.presentation))', source)
+        self.assertIn('maxLines = 1, softWrap = false', source)
+        self.assertIn('placeable.placeRelativeWithLayer', source)
+
     def test_value_returning_composables_keep_their_values_in_both_repeat_forms(self):
         source, report = self.transformed("value_composables")
         for assignment in ('val remembered = rememberDpadFocusKeeper()',

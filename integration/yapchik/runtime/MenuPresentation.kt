@@ -19,3 +19,6 @@ internal fun menuPresentation(presentation: List<ActionVisual>): List<ActionVisu
         }
     }
 }
+
+internal fun menuContentScale(contentWidth: Int, availableWidth: Int): Float =
+    if (contentWidth <= 0) 1f else (availableWidth.toFloat() / contentWidth).coerceIn(0f, 1f)
