@@ -1,7 +1,7 @@
 # Yapchik integration plan
 
 Status: implemented on the `Yapchik` branch; the signed `v0.5.2493` APK from
-`38662ed` passed CI and Options/Search device regression checks on a Sonim X320.
+`d41a771` passed CI and Options/Search device regression checks on a Sonim X320.
 The design below is retained as the acceptance contract.
 
 ## Implementation status
@@ -25,15 +25,23 @@ The design below is retained as the acceptance contract.
   dispatch on `Yapchik`, with branch-specific state and keepalive updates.
 - Local checks cover parser fixtures, variants, updater isolation, publication
   prerequisites, and Kotlin action-store behavior. Runtime plus vendored library compile
-  against real Android/Compose artifacts. Fresh upstream integration discovers 344
+  against real Android/Compose artifacts. Fresh upstream integration instruments 347
   controls in the combined build with no recognized unsupported cases.
 - Full Android Gradle/APK compilation and publication passed in GitHub Actions run
-  `38193356675`; the Android SDK is not installed locally. Device checks verified
+  `38195520599`; the Android SDK is not installed locally. Device checks verified
   vendor and standard left softkeys, repeated Options activation, on-screen Options,
   D-pad focus and Settings activation, Back dismissal, and right-softkey Search.
   The installed APK checksum matched publication provenance, diagnostics were off,
   and the tested process produced no crash entries. Broader multi-device insets,
   calibration, and focus acceptance remain outside these regression checks.
+- Elevated category chips retain their current callbacks and presentation. Device
+  selection of Restaurants, Coffee, and Gas from Options opened the corresponding
+  search results. Parking's custom keyboard/tap control uses a validated adapter
+  capturing its original `onOk` callback; its P icon appears and receives D-pad
+  focus in Options. Parking activation was not exercised to avoid saving a test
+  parking location. Original tap/long-press/key handlers remain unchanged, and a
+  changed adapter shape fails build-time validation. Local tests pass: 60 Python
+  tests and 15 Kotlin tests.
 
 Options uses an idempotent open command because a device can emit multiple Yapchik
 key aliases for one softkey press. Yapchik still owns profile resolution and dispatch;
