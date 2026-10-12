@@ -16,7 +16,7 @@ BUTTONS = {
     "Button", "TextButton", "OutlinedButton", "ElevatedButton", "FilledTonalButton", "IconButton",
     "FilledIconButton", "FilledTonalIconButton", "OutlinedIconButton", "FloatingActionButton",
     "SmallFloatingActionButton", "LargeFloatingActionButton", "ExtendedFloatingActionButton",
-    "DropdownMenuItem", "AssistChip", "SuggestionChip", "InputChip", "FilterChip", "RadioButton",
+    "DropdownMenuItem", "AssistChip", "ElevatedAssistChip", "SuggestionChip", "ElevatedSuggestionChip", "InputChip", "FilterChip", "RadioButton",
     "Surface", "Card", "ElevatedCard", "OutlinedCard", "Checkbox", "Switch", "IconToggleButton",
     "FilledIconToggleButton", "FilledTonalIconToggleButton", "OutlinedIconToggleButton",
 }
@@ -27,7 +27,7 @@ PRESENTATION = {"Text", "Icon", "BasicTextField", "TextField", "OutlinedTextFiel
 REPEATS = {"items", "itemsIndexed", "forEach", "forEachIndexed"}
 UNSUPPORTED = {"triStateToggleable", "TriStateCheckbox"}
 MODIFIER_POSITIONS = {name: 1 for name in BUTTONS}
-MODIFIER_POSITIONS.update({name: 2 for name in TOGGLES | {"RadioButton", "DropdownMenuItem", "AssistChip", "SuggestionChip"}})
+MODIFIER_POSITIONS.update({name: 2 for name in TOGGLES | {"RadioButton", "DropdownMenuItem", "AssistChip", "ElevatedAssistChip", "SuggestionChip", "ElevatedSuggestionChip"}})
 MODIFIER_POSITIONS.update({"FilterChip": 3, "InputChip": 3})
 
 
@@ -135,7 +135,7 @@ def edits_for_file(file, composables=None):
         if any(previous["full"] == target["full"] for previous_call, previous in actions):
             record("unsupported", call, "Multiple activations share one control; presentation ownership requires adapter review")
             continue
-        enabled_position = (3 if name in TOGGLES | {"RadioButton", "DropdownMenuItem", "AssistChip", "SuggestionChip"}
+        enabled_position = (3 if name in TOGGLES | {"RadioButton", "DropdownMenuItem", "AssistChip", "ElevatedAssistChip", "SuggestionChip", "ElevatedSuggestionChip"}
                             else 4 if name in {"FilterChip", "InputChip"}
                             else 2 if name in {"Surface", "Card", "ElevatedCard", "OutlinedCard"} or name.endswith("Button") and "Floating" not in name
                             else None)
@@ -193,6 +193,40 @@ def edits_for_file(file, composables=None):
                 continue
         actions.append((call, target))
         record("instrumented", call, "Live action reference; original callback and presentation retained")
+
+    if file["package"] == "app.vela.ui.map" and path.name == "MapScreen.kt":
+        parking = [function for function in file["functions"] if function["name"] == "ParkingControl"]
+        for function in parking:
+            candidates = []
+            for control in calls:
+                if control["callee"] != "Box" or control["function"] != function["span"]:
+                    continue
+                modifier = argument(control, "modifier", 0)
+                if not modifier:
+                    continue
+                key_handlers = [call for call in calls if call["callee"] == "onKeyEvent" and contains(modifier, call["full"])]
+                gestures = [call for call in calls if call["callee"] == "detectTapGestures" and contains(modifier, call["full"])]
+                if key_handlers and gestures:
+                    candidates.append((control, modifier, key_handlers, gestures))
+            if len(candidates) != 1:
+                report["unsupported"].append({"file": path.name, "reason": "Parking keyboard/tap control changed; adapter review required"})
+                continue
+            control, modifier, key_handlers, gestures = candidates[0]
+            keyboard = key_handlers[0]
+            callbacks = [call for call in calls if call["callee"] == "onOk" and contains(keyboard["full"], call["full"])]
+            if (len(key_handlers) != 1 or len(gestures) != 1 or len(callbacks) != 1
+                    or resolve(file, control, source) != "androidx.compose.foundation.layout.Box"
+                    or not argument(gestures[0], "onTap")
+                    or any(target["full"] == control["full"] for previous, target in actions)):
+                record("unsupported", control, "Parking activation changed; adapter review required")
+                continue
+            source_id = file["package"] + "." + path.stem + ":parking:" + str(control["span"][0])
+            variable = "yapchikAction" + str(control["span"][0])
+            wrap(control["full"], RUNTIME + f'YapchikAction({json.dumps(source_id)}, onOk) {{ {variable} -> ', " }")
+            wrap(modifier, "(", f").then({variable}.modifier)")
+            actions.append((control, control))
+            record("discovered", control, "Parking keyboard/tap activation adapter")
+            record("instrumented", control, "Live original keyboard callback and icon retained; gestures unchanged")
 
     for call in calls:
         symbol = resolve(file, call, source)

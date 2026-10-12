@@ -188,6 +188,64 @@ import androidx.compose.runtime.Composable
         self.assertIn('YapchikText("Run")', source)
         self.assertNotIn('YapchikAction("fixture.buttons:6:', source.split('callback: () -> Unit)')[0])
 
+    def test_elevated_chips_keep_handlers_enabled_state_and_presentation(self):
+        source = '''package fixture
+import androidx.compose.material3.ElevatedAssistChip
+import androidx.compose.material3.ElevatedSuggestionChip
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+@Composable fun Screen(callback: () -> Unit, enabled: Boolean) {
+    ElevatedAssistChip(onClick = callback, label = { Text("Restaurants") }, enabled = enabled)
+    ElevatedSuggestionChip(callback, { Text("Coffee") }, Modifier, enabled)
+}
+'''
+        path = Path(self.directory.name) / 'ElevatedChips.kt'
+        path.write_text(source, encoding='utf-8')
+        report = instrument([path], Path(self.directory.name) / 'chips-coverage.json')
+        transformed = path.read_text(encoding='utf-8')
+        self.assertEqual(2, len(report['instrumented']))
+        self.assertEqual(2, transformed.count('.bind(callback)'))
+        self.assertEqual(2, transformed.count('.trackEnabled(enabled)'))
+        self.assertEqual(2, transformed.count('.modifier'))
+        self.assertIn('YapchikText("Restaurants")', transformed)
+        self.assertIn('YapchikText("Coffee")', transformed)
+
+    def parking_source(self):
+        return '''package app.vela.ui.map
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
+@Composable private fun ParkingControl(onOk: () -> Unit, onTap: () -> Unit, history: () -> Unit) {
+    Box(Modifier.size(48.dp).onKeyEvent { ev ->
+        if (ev.type == KeyUp) { onOk(); true } else false
+    }.focusable().pointerInput(Unit) {
+        detectTapGestures(onTap = { onTap() }, onLongPress = { history() })
+    }) { Icon(Sym.LocalParking, contentDescription = "Save parking") }
+}
+'''
+
+    def test_parking_adapter_captures_original_keyboard_callback_and_keeps_gestures(self):
+        path = Path(self.directory.name) / 'MapScreen.kt'
+        path.write_text(self.parking_source(), encoding='utf-8')
+        report = instrument([path], Path(self.directory.name) / 'parking-coverage.json')
+        transformed = path.read_text(encoding='utf-8')
+        self.assertEqual(1, len(report['instrumented']))
+        self.assertIn(', onOk) { yapchikAction', transformed)
+        self.assertIn('.then(yapchikAction', transformed)
+        self.assertIn('if (ev.type == KeyUp) { onOk(); true } else false', transformed)
+        self.assertIn('detectTapGestures(onTap = { onTap() }, onLongPress = { history() })', transformed)
+        self.assertIn('YapchikIcon(Sym.LocalParking, "Save parking")', transformed)
+        self.assertNotIn('.bind(', transformed)
+
+    def test_changed_parking_activation_fails_closed_without_writing_source(self):
+        source = self.parking_source().replace('onOk(); true', 'differentCallback(); true')
+        path = Path(self.directory.name) / 'MapScreen.kt'
+        path.write_text(source, encoding='utf-8')
+        with self.assertRaisesRegex(RuntimeError, 'requiring review'):
+            instrument([path], Path(self.directory.name) / 'parking-changed.json')
+        self.assertEqual(source, path.read_text(encoding='utf-8'))
+
     def test_icon_only_has_icon_and_accessibility_not_invented_text(self):
         source, report = self.transformed("icon")
         self.assertIn('YapchikIcon(icon, "Details")', source)

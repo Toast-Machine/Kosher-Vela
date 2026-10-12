@@ -49,6 +49,13 @@ must leave Options open. Back dismisses it. No phone-specific numeric key mappin
 or replacement key handler is needed. A normal manual workflow run can set
 `release_tag` to rebuild and publish one existing tag before rebuilding the backlog.
 
+Elevated assist/suggestion chips use the same live action instrumentation as their
+non-elevated counterparts, including repeated category shortcuts. Parking uses a
+PSI-validated adapter for its custom focusable keyboard/tap Box: Options captures
+the existing `onOk` callback and original icon at the control site. Original tap,
+long-press, and keyboard handlers remain unchanged. An unexpected Parking control
+shape or activation fails coverage validation rather than guessing a new handler.
+
 Run from the automation repository with Python and Java/Javac 17 or newer:
 
 ```text
