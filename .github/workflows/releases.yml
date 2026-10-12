@@ -20,7 +20,7 @@ on:
         type: boolean
         default: false
       release_tag:
-        description: Rebuild one existing upstream tag, or leave blank for normal release polling
+        description: Rebuild existing upstream tags (comma-separated), or leave blank for normal release polling
         type: string
         default: ''
   repository_dispatch:

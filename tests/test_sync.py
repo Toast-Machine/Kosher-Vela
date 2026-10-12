@@ -54,6 +54,30 @@ class ReleaseTrackingTests(unittest.TestCase):
         with patch.dict(os.environ, {"YAPCHIK_DIAGNOSTICS": "false", "RELEASE_TAG_FILTER": releases[0]["tag"]}):
             self.assertEqual([{**releases[0], "kind": "build"}], planned_releases(releases, state))
 
+    def test_targeted_batch_rebuilds_only_requested_tags_without_mutating_state(self):
+        releases = [release(number) for number in range(1, 7)]
+        state = initial_state(releases)
+        state['completed'] = {item['id']: item.copy() for item in releases}
+        original = copy.deepcopy(state)
+        selected = releases[1:6]
+        tags = ', '.join(item['tag'] for item in selected)
+        with patch.dict(os.environ, {'YAPCHIK_DIAGNOSTICS': 'false', 'RELEASE_TAG_FILTER': tags}):
+            self.assertEqual([{**item, 'kind': 'build'} for item in selected], planned_releases(releases, state))
+        self.assertEqual(original, state)
+
+    def test_targeted_batch_rejects_unknown_duplicate_and_empty_tags(self):
+        releases = [release(1), release(2)]
+        for tags in (releases[0]['tag'] + ',unknown', releases[0]['tag'] + ',' + releases[0]['tag'], releases[0]['tag'] + ','):
+            with patch.dict(os.environ, {'YAPCHIK_DIAGNOSTICS': 'false', 'RELEASE_TAG_FILTER': tags}):
+                with self.assertRaisesRegex(RuntimeError, 'existing upstream app release'):
+                    planned_releases(releases, initial_state(releases))
+
+    def test_diagnostics_reject_batch_selection(self):
+        releases = [release(1), release(2)]
+        with patch.dict(os.environ, {'YAPCHIK_DIAGNOSTICS': 'true', 'RELEASE_TAG_FILTER': ','.join(item['tag'] for item in releases)}):
+            with self.assertRaisesRegex(RuntimeError, 'exactly one'):
+                planned_releases(releases, initial_state(releases))
+
     def test_state_branch_defaults_to_main_and_accepts_branch_override(self):
         with patch.dict(os.environ, {}, clear=True):
             self.assertEqual("main", state_branch())

@@ -120,10 +120,15 @@ def planned_releases(releases, state):
     diagnostic = os.environ.get("YAPCHIK_DIAGNOSTICS") == "true"
     if not tag and not diagnostic:
         return pending_releases(releases, state)
-    selected = [release for release in releases if release["tag"] == tag]
-    if not tag or len(selected) != 1:
-        raise RuntimeError("Targeted builds require exactly one existing upstream app release tag")
-    return [{**selected[0], "kind": "build"}]
+    tags = [value.strip() for value in tag.split(",")]
+    if diagnostic and len(tags) != 1:
+        raise RuntimeError("Diagnostic builds require exactly one existing upstream app release tag")
+    if not tag or any(not value for value in tags) or len(set(tags)) != len(tags):
+        raise RuntimeError("Targeted builds require distinct existing upstream app release tags")
+    selected = [[release for release in releases if release["tag"] == value] for value in tags]
+    if any(len(matches) != 1 for matches in selected):
+        raise RuntimeError("Targeted builds require existing upstream app release tags")
+    return [{**matches[0], "kind": "build"} for matches in selected]
 
 
 def write_json(path, value):

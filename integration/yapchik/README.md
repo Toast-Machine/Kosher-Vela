@@ -48,6 +48,9 @@ are valid left-slot events in Yapchik's universal profile. Repeated open request
 must leave Options open. Back dismisses it. No phone-specific numeric key mapping
 or replacement key handler is needed. A normal manual workflow run can set
 `release_tag` to rebuild and publish one existing tag before rebuilding the backlog.
+Normal builds also accept comma-separated tags to rebuild an explicit batch in one
+workflow run; diagnostic builds remain limited to a single existing tag. Unknown,
+duplicate, or empty batch tags fail planning before any builds or state changes.
 
 Elevated assist/suggestion chips use the same live action instrumentation as their
 non-elevated counterparts, including repeated category shortcuts. Parking uses a
