@@ -1,7 +1,8 @@
 # Yapchik integration plan
 
-Status: implemented on the local `Yapchik` branch; Android APK and device acceptance
-validation remain outstanding. The design below is retained as the acceptance contract.
+Status: implemented on the `Yapchik` branch; the signed `v0.5.2493` APK from
+`38662ed` passed CI and Options/Search device regression checks on a Sonim X320.
+The design below is retained as the acceptance contract.
 
 ## Implementation status
 
@@ -26,9 +27,18 @@ validation remain outstanding. The design below is retained as the acceptance co
   prerequisites, and Kotlin action-store behavior. Runtime plus vendored library compile
   against real Android/Compose artifacts. Fresh upstream integration discovers 344
   controls in the combined build with no recognized unsupported cases.
-- Full Android Gradle/APK compilation is not locally verified because the Android SDK
-  is missing. Small-screen insets, key profiles/calibration, touch behavior, and device
-  focus acceptance tests are not yet performed. CI must pass before release.
+- Full Android Gradle/APK compilation and publication passed in GitHub Actions run
+  `38193356675`; the Android SDK is not installed locally. Device checks verified
+  vendor and standard left softkeys, repeated Options activation, on-screen Options,
+  D-pad focus and Settings activation, Back dismissal, and right-softkey Search.
+  The installed APK checksum matched publication provenance, diagnostics were off,
+  and the tested process produced no crash entries. Broader multi-device insets,
+  calibration, and focus acceptance remain outside these regression checks.
+
+Options uses an idempotent open command because a device can emit multiple Yapchik
+key aliases for one softkey press. Yapchik still owns profile resolution and dispatch;
+the application does not add device-specific key handlers. Options list saveable keys
+are stable `Long` values; action identity and dispatch retain the original identities.
 
 The actual hide-buttons option and map-control changes remain deferred.
 
