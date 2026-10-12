@@ -1,17 +1,41 @@
 name: Mirror Vela app releases
 
 on:
+  push:
+    branches: [main, Yapchik]
+    paths:
+      - 'scripts/**'
+      - 'tests/**'
+      - 'patches/**'
+      - 'policy-tests/**'
+      - 'integration/**'
+      - '.gitattributes'
+      - '.github/workflows/**'
   schedule:
     - cron: '2-57/5 * * * *'
   workflow_dispatch:
+    inputs:
+      key_diagnostics:
+        description: Build a temporary key diagnostic APK without publishing or changing release state
+        type: boolean
+        default: false
+      release_tag:
+        description: Rebuild existing upstream tags (comma-separated), or leave blank for normal release polling
+        type: string
+        default: ''
   repository_dispatch:
     types: [upstream-release]
 
 permissions:
   contents: read
 
+env:
+  RELEASE_STATE_BRANCH: ${{ github.ref_name }}
+  YAPCHIK_DIAGNOSTICS: ${{ github.event_name == 'workflow_dispatch' && inputs.key_diagnostics && 'true' || 'false' }}
+  RELEASE_TAG_FILTER: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || '' }}
+
 concurrency:
-  group: vela-release-sync
+  group: ${{ github.event_name == 'workflow_dispatch' && inputs.key_diagnostics && format('vela-key-diagnostics-{0}', github.ref_name) || 'vela-release-sync' }}
   cancel-in-progress: false
 
 jobs:
@@ -25,8 +49,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6
+        with:
+          distribution: temurin
+          java-version: '17'
       - name: Test release tracking
         run: python3 -m unittest discover -s tests -v
+      - name: Test Yapchik action lifecycle and dispatch
+        run: python3 scripts/test_yapchik_runtime.py
       - name: Find all unprocessed app releases
         id: plan
         env:
@@ -38,7 +68,7 @@ jobs:
     needs: plan
     if: needs.plan.outputs.has_work == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 180
     permissions:
       contents: write
     strategy:
@@ -78,43 +108,36 @@ jobs:
       - name: Set up Gradle caching
         if: matrix.kind == 'build'
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c
-      - name: Apply locked policy and prepare reproducible build inputs
+      - name: Build and verify Kosher Vela with Yapchik and kashering
         if: matrix.kind == 'build'
         env:
           GH_TOKEN: ${{ github.token }}
           VELA_KEYSTORE_BASE64: ${{ secrets.VELA_KEYSTORE_BASE64 }}
           VELA_KEYSTORE_PASSWORD: ${{ secrets.VELA_KEYSTORE_PASSWORD }}
-        run: python3 scripts/build.py prepare
-      - name: Test locked settings and build signed release APK
-        if: matrix.kind == 'build'
-        working-directory: upstream
-        env:
-          VELA_KEYSTORE_PASSWORD: ${{ secrets.VELA_KEYSTORE_PASSWORD }}
-          VELA_KEY_ALIAS: kosher-vela
-        run: |
-          chmod +x gradlew
-          ./gradlew :app:testDebugUnitTest --tests app.vela.ui.KosherPolicyTest \
-            :app:assembleRelease --no-daemon \
-            -PappId=app.vela.kosher \
-            "-PappVersionName=$APP_VERSION_NAME" \
-            "-PappVersionCode=$APP_VERSION_CODE"
-      - name: Verify APK and archive full patched source
-        if: matrix.kind == 'build'
-        run: python3 scripts/build.py package
+        run: python3 scripts/build.py variants
       - name: Publish with the original upstream tag and release status
+        if: env.YAPCHIK_DIAGNOSTICS != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/build.py publish
       - name: Record failure for delayed retry
-        if: failure()
+        if: failure() && env.YAPCHIK_DIAGNOSTICS != 'true'
         run: python3 scripts/sync.py failure
       - name: Save publication or failure receipt
-        if: always() && hashFiles('out/receipt/*.json') != ''
+        if: always() && env.YAPCHIK_DIAGNOSTICS != 'true' && hashFiles('out/receipt/*.json') != ''
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: receipt-${{ matrix.id }}
           path: out/receipt/*.json
           retention-days: 7
+          if-no-files-found: error
+      - name: Save temporary diagnostic APK and source
+        if: env.YAPCHIK_DIAGNOSTICS == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: key-diagnostics-${{ matrix.tag }}
+          path: out/assets/*
+          retention-days: 3
           if-no-files-found: error
       - name: Remove signing material
         if: always()
@@ -122,7 +145,7 @@ jobs:
 
   finish:
     needs: [plan, work]
-    if: always() && needs.plan.result == 'success'
+    if: always() && needs.plan.result == 'success' && !(github.event_name == 'workflow_dispatch' && inputs.key_diagnostics)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

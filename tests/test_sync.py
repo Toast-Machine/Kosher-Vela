@@ -1,12 +1,17 @@
+import base64
 import copy
+import json
+import os
 import sys
+import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from sync import (fingerprints, initial_state, list_releases, pending_releases, prune_failures,
-                  state_commit_message)
+from sync import (fingerprints, initial_state, list_releases, pending_releases, planned_releases, prune_failures,
+                  keepalive, read_remote_state, record_completion, state_branch, state_commit_message)
 
 
 def release(number, tag=None):
@@ -24,6 +29,92 @@ def release(number, tag=None):
 
 
 class ReleaseTrackingTests(unittest.TestCase):
+    def test_diagnostics_rebuild_only_requested_existing_tag_without_mutating_state(self):
+        releases = [release(1), release(2)]
+        state = initial_state(releases)
+        state["completed"] = {item["id"]: item.copy() for item in releases}
+        original = copy.deepcopy(state)
+        with patch.dict(os.environ, {"YAPCHIK_DIAGNOSTICS": "true", "RELEASE_TAG_FILTER": releases[1]["tag"]}):
+            self.assertEqual([{**releases[1], "kind": "build"}], planned_releases(releases, state))
+        self.assertEqual(original, state)
+        with patch.dict(os.environ, {"YAPCHIK_DIAGNOSTICS": "false", "RELEASE_TAG_FILTER": ""}):
+            self.assertEqual([], planned_releases(releases, state))
+
+    def test_diagnostics_reject_missing_or_unknown_release_tag(self):
+        releases = [release(1)]
+        for tag in ("", "unknown"):
+            with patch.dict(os.environ, {"YAPCHIK_DIAGNOSTICS": "true", "RELEASE_TAG_FILTER": tag}):
+                with self.assertRaisesRegex(RuntimeError, "existing upstream app release"):
+                    planned_releases(releases, initial_state(releases))
+
+    def test_targeted_normal_build_rebuilds_only_selected_tag(self):
+        releases = [release(1), release(2)]
+        state = initial_state(releases)
+        state["completed"] = {item["id"]: item.copy() for item in releases}
+        with patch.dict(os.environ, {"YAPCHIK_DIAGNOSTICS": "false", "RELEASE_TAG_FILTER": releases[0]["tag"]}):
+            self.assertEqual([{**releases[0], "kind": "build"}], planned_releases(releases, state))
+
+    def test_targeted_batch_rebuilds_only_requested_tags_without_mutating_state(self):
+        releases = [release(number) for number in range(1, 7)]
+        state = initial_state(releases)
+        state['completed'] = {item['id']: item.copy() for item in releases}
+        original = copy.deepcopy(state)
+        selected = releases[1:6]
+        tags = ', '.join(item['tag'] for item in selected)
+        with patch.dict(os.environ, {'YAPCHIK_DIAGNOSTICS': 'false', 'RELEASE_TAG_FILTER': tags}):
+            self.assertEqual([{**item, 'kind': 'build'} for item in selected], planned_releases(releases, state))
+        self.assertEqual(original, state)
+
+    def test_targeted_batch_rejects_unknown_duplicate_and_empty_tags(self):
+        releases = [release(1), release(2)]
+        for tags in (releases[0]['tag'] + ',unknown', releases[0]['tag'] + ',' + releases[0]['tag'], releases[0]['tag'] + ','):
+            with patch.dict(os.environ, {'YAPCHIK_DIAGNOSTICS': 'false', 'RELEASE_TAG_FILTER': tags}):
+                with self.assertRaisesRegex(RuntimeError, 'existing upstream app release'):
+                    planned_releases(releases, initial_state(releases))
+
+    def test_diagnostics_reject_batch_selection(self):
+        releases = [release(1), release(2)]
+        with patch.dict(os.environ, {'YAPCHIK_DIAGNOSTICS': 'true', 'RELEASE_TAG_FILTER': ','.join(item['tag'] for item in releases)}):
+            with self.assertRaisesRegex(RuntimeError, 'exactly one'):
+                planned_releases(releases, initial_state(releases))
+
+    def test_state_branch_defaults_to_main_and_accepts_branch_override(self):
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertEqual("main", state_branch())
+        with patch.dict(os.environ, {"RELEASE_STATE_BRANCH": "Yapchik"}):
+            self.assertEqual("Yapchik", state_branch())
+
+    def test_remote_state_is_read_from_selected_branch(self):
+        api = Mock()
+        api.request.return_value = {"content": base64.b64encode(b'{"completed": {}}').decode(), "sha": "state-sha"}
+        with patch.dict(os.environ, {"RELEASE_STATE_BRANCH": "feature/Yapchik"}):
+            self.assertEqual(({"completed": {}}, "state-sha"), read_remote_state(api))
+        self.assertTrue(api.request.call_args.args[0].endswith("?ref=feature%2FYapchik"))
+
+    def test_completion_writes_state_to_selected_branch_not_main(self):
+        api = Mock()
+        api.request.return_value = None
+        item = release(1)
+        state = initial_state([item])
+        with tempfile.TemporaryDirectory() as temporary:
+            (Path(temporary) / "receipt.json").write_text(json.dumps(item), encoding="utf-8")
+            with patch.dict(os.environ, {"RELEASE_STATE_BRANCH": "Yapchik"}), \
+                    patch("sync.read_remote_state", return_value=(state, "state-sha")):
+                record_completion(api, temporary)
+        updates = [call for call in api.request.call_args_list if call.kwargs.get("method") == "PUT"]
+        self.assertEqual(1, len(updates))
+        self.assertEqual("Yapchik", updates[0].args[1]["branch"])
+
+    def test_keepalive_reads_and_updates_selected_branch(self):
+        api = Mock()
+        old = (datetime.now(timezone.utc) - timedelta(days=40)).isoformat()
+        api.request.side_effect = [[{"commit": {"committer": {"date": old}}}], None, None]
+        with patch.dict(os.environ, {"RELEASE_STATE_BRANCH": "Yapchik"}):
+            keepalive(api)
+        self.assertIn("?sha=Yapchik&", api.request.call_args_list[0].args[0])
+        self.assertTrue(api.request.call_args_list[1].args[0].endswith("?ref=Yapchik"))
+        self.assertEqual("Yapchik", api.request.call_args_list[2].args[1]["branch"])
+
     def test_failed_build_cooldown_does_not_drop_new_releases(self):
         initial = release(1)
         state = initial_state([initial])

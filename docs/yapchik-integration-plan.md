@@ -1,7 +1,58 @@
 # Yapchik integration plan
 
-Status: agreed design; not implemented. This document records the plan, not
-authorization to implement it.
+Status: implemented on the `Yapchik` branch; the signed `v0.5.2493` APK from
+`0b16b49` passed CI and Options device regression checks on a Sonim X320.
+The design below is retained as the acceptance contract.
+
+## Implementation status
+
+- `scripts/yapchik.py` instruments customized source through Kotlin compiler PSI 2.1.20,
+  validates generated syntax before replacing files, and writes `yapchik-coverage.json`.
+  Recognized unsupported patterns fail the build for review.
+- `integration/yapchik/runtime` supplies lifecycle-aware action references, original-site
+  callback/state capture, live clipped bounds, ownership, and the themed D-pad Options
+  overlay. Native Dialog/Popup windows suppress underlying bindings.
+- Yapchik revision `bf5021c648ae6adff60644a7cf2633c938d70ead` is vendored with its
+  license/notices and digest lock, independently of the Kosher policy.
+- Repeated lazy/list/for-loop controls include item scopes and separate composition
+  instance identities, including duplicate item IDs. Custom composable call sites
+  also contribute scopes. Multiple activations sharing a control require adapter review.
+- `scripts/variants.py` supports neither/either/both features internally. Releases build
+  only Kosher with Yapchik (`app.vela.kosher`) from an isolated exact-commit tree,
+  run app unit tests, and verify package/version/signature. Standalone Yapchik,
+  Kosher-only, and separate combined-package releases have been removed; existing
+  Kosher installations gain Yapchik in place. Release CI supports pushes and manual
+  dispatch on `Yapchik`, with branch-specific state and keepalive updates.
+- Local checks cover parser fixtures, variants, updater isolation, publication
+  prerequisites, and Kotlin action-store behavior. Runtime plus vendored library compile
+  against real Android/Compose artifacts. Fresh upstream integration instruments 347
+  controls in the combined build with no recognized unsupported cases.
+- Full Android Gradle/APK compilation and publication passed in GitHub Actions run
+  `38197530960`; the Android SDK is not installed locally. Device checks verified
+  vendor and standard left softkeys, repeated Options activation, on-screen Options,
+  D-pad focus and Settings activation, Back dismissal, and right-softkey Search.
+  The installed APK checksum matched publication provenance, diagnostics were off,
+  and the tested process produced no crash entries. Broader multi-device insets,
+  calibration, and focus acceptance remain outside these regression checks.
+- Elevated category chips retain their current callbacks and presentation. Device
+  selection of Restaurants, Coffee, and Gas from Options opened the corresponding
+  search results. Parking's custom keyboard/tap control uses a validated adapter
+  capturing its original `onOk` callback; its P icon appears and receives D-pad
+  focus in Options. Parking activation was not exercised to avoid saving a test
+  parking location. Original tap/long-press/key handlers remain unchanged, and a
+  changed adapter shape fails build-time validation.
+- The follow-up accessibility labeling change passed 60 Python and 21 Kotlin tests,
+  real Compose compilation, and the signed release build. Device checks confirmed
+  existing descriptions display as labels in Map and Settings Options, including
+  Save parking spot, Center on my location, and Back. Existing category text remains
+  unchanged; D-pad scrolling and Settings activation passed without crash entries.
+
+Options uses an idempotent open command because a device can emit multiple Yapchik
+key aliases for one softkey press. Yapchik still owns profile resolution and dispatch;
+the application does not add device-specific key handlers. Options list saveable keys
+are stable `Long` values; action identity and dispatch retain the original identities.
+
+The actual hide-buttons option and map-control changes remain deferred.
 
 ## Agreed behavior
 
@@ -18,8 +69,15 @@ to the right softkey**. Do not duplicate that action in Options. Options never m
 to the right. Other distinct search actions are not excluded merely by their name.
 Search invokes the original control's current handler.
 
-Keep existing on-screen controls initially. Icon-only controls produce icon-only
-entries, retaining accessibility descriptions without requiring visible labels.
+Keep existing on-screen controls initially. Per the follow-up labeling request,
+icon-only menu entries display their existing nonblank accessibility descriptions
+as text labels. Existing text labels take precedence; descriptions are not invented
+where none exist, and a description rendered as text is not repeated on its icon.
+Options is a bottom-start panel capped at half the available screen width and
+height, excluding system insets. Overflowing lists scroll; each overly wide option
+scales its complete icon/text/toggle presentation uniformly to fit without
+truncating labels. Outside taps and Back dismiss the panel. The Yapchik settings
+entry reuses the native Settings hub row and appears immediately below Appearance.
 Text controls retain text; controls with both retain both. Non-interactive text,
 images, and decorations are not actions.
 
@@ -32,8 +90,9 @@ Keep the library, application bridge, instrumentation, configuration, and tests
 separate from kashering. Neither feature may depend on the other.
 
 Support applying neither feature, Yapchik only, kashering only, or both. This is
-feature modularity, not a request for extra release channels or signing/updater
-changes. When both are selected, apply existing customization patches first and
+feature modularity. The revised implementation request specifies only `app.vela.kosher`
+with both features, retaining the existing signing key and Kosher updater asset prefix.
+When both are selected, apply existing customization patches first and
 instrument the resulting source. Use a separate integration entry point called by
 the build orchestrator, not transformations inside `scripts/policy.py`.
 
@@ -178,7 +237,8 @@ Required validation:
 
 Handle upstream tooling/library changes and newly unsupported mechanisms when
 encountered. Do not promise maintenance-free support for arbitrary future source.
-This document changes no app code, workflow behavior, or releases.
+The implementation changes customization and release workflows. Published APKs require
+the release workflow to pass; local source/parser validation does not publish builds.
 
 ## Design references
 

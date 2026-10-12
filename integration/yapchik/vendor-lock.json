@@ -1,0 +1,27 @@
+{
+  "repository": "theOnionsAreWatching/yapchik",
+  "revision": "bf5021c648ae6adff60644a7cf2633c938d70ead",
+  "files": {
+    "consumer-rules.pro": "bfd7382d6fe1b522d20b1464011c6d1a4bf233947c421af201052790c98e2b15",
+    "LICENSE": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768",
+    "NOTICE": "d2e7af85600ac5e7fa1185871fbfc476fcb2030c2dee5c56d120206ac821dc91",
+    "src/main/AndroidManifest.xml": "c8fe08b06e479efc7e3d00476fffe693a3e943e2b874b3c6a1ba5156fc180751",
+    "src/main/java/com/theonionsarewatching/yapchik/AutoDetect.kt": "9e0c5094943c063fd50be957a6082e3502f740f45653aba545a83d6235dbad39",
+    "src/main/java/com/theonionsarewatching/yapchik/internal/SoftkeyWindowCallback.kt": "38d4636a8d9586299d00d3c492532ac5a6e8d98433d3278283f2e3e60682f8fe",
+    "src/main/java/com/theonionsarewatching/yapchik/KeyProfile.kt": "6415f1c845be4b8c196b06435523c169a116c76e4bc3b0a316e23fe2213396ff",
+    "src/main/java/com/theonionsarewatching/yapchik/ReservedKeys.kt": "0763a95d7dc24217ab49a4084ef16a7da51073c4d2b70818851aa1005750debf",
+    "src/main/java/com/theonionsarewatching/yapchik/SoftkeyAction.kt": "90b38a6f00db2bbd662b9273467502d0e83ba49ba92eb48c87a3cee4f116f39a",
+    "src/main/java/com/theonionsarewatching/yapchik/SoftkeyBar.kt": "b30b9dbe38fff0c9982992b2740b9dc423a31009ceae474e15a02a4801dbe5cc",
+    "src/main/java/com/theonionsarewatching/yapchik/SoftkeyConfig.kt": "28358e8a04daa0db9bf5c454145ff39a5c5e5f99b469aae75f6f3cfee0061dd0",
+    "src/main/java/com/theonionsarewatching/yapchik/SoftkeyController.kt": "f0242d0c9dc2585d08e20b1ae5cd6c84f6ab35ef21b017a1041d0ee0796c6271",
+    "src/main/java/com/theonionsarewatching/yapchik/SoftkeyMode.kt": "eb30361342bb363e17cde516df98276369310049ff9243fdb3c02f8ac90dd06a",
+    "src/main/java/com/theonionsarewatching/yapchik/SoftkeyProfileChooser.kt": "0ea1eac947f5b7cc0e30476a531278172b7dc762cc7e195ddc2fa427f0466be4",
+    "src/main/java/com/theonionsarewatching/yapchik/SoftkeyProvider.kt": "0cdb8324cad222d9ad63cab39c4e3893049db985a81fe5002e8e06975cfb50f0",
+    "src/main/java/com/theonionsarewatching/yapchik/Softkeys.kt": "617b90504739a305fa247e814f273bb2b64fc024df0fcef786176da5aca1514a",
+    "src/main/java/com/theonionsarewatching/yapchik/SoftkeySlot.kt": "83e37470fb56179ca529e12734cda8152262fdac29d961cba7c75ead89675398",
+    "src/main/java/com/theonionsarewatching/yapchik/Yapchik.kt": "aef075da0607d9b32f4030d9c65132a779983d6ba68af268f0740d31cdf15372",
+    "src/main/java/com/theonionsarewatching/yapchik/YapchikPrefs.kt": "dbd1766f00a97c6d593c2b93b860a0912790de9bb536133c6b251c8f1bd49515",
+    "src/main/java/com/theonionsarewatching/yapchik/YapchikSettingsDialog.kt": "ed40c4c4aca9efa745ded578d397152fa5bae699de66f87a57e09e07b1b96a0d",
+    "src/main/java/com/theonionsarewatching/yapchik/YapchikStyle.kt": "aee3a3b8964055686aa6415a92e8a73766269a0b7fb76fb6227518e0ca700790"
+  }
+}
