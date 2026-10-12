@@ -115,6 +115,16 @@ def pending_releases(releases, state):
     return sorted(pending, key=lambda release: release["published_at"])
 
 
+def planned_releases(releases, state):
+    if os.environ.get("YAPCHIK_DIAGNOSTICS") != "true":
+        return pending_releases(releases, state)
+    tag = os.environ.get("DIAGNOSTIC_RELEASE_TAG", "").strip()
+    selected = [release for release in releases if release["tag"] == tag]
+    if not tag or len(selected) != 1:
+        raise RuntimeError("Diagnostics require exactly one existing upstream app release tag")
+    return [{**selected[0], "kind": "build"}]
+
+
 def write_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -263,7 +273,7 @@ def main():
         print(f"Excluded {len(state['excluded_release_ids'])} older app releases")
     elif args.command == "plan":
         state = json.loads(Path(STATE_PATH).read_text(encoding="utf-8"))
-        pending = pending_releases(list_releases(api), state)
+        pending = planned_releases(list_releases(api), state)
         batch = pending[:200]
         print(f"{len(pending)} pending releases; {len(batch)} in this batch")
         if len(pending) > len(batch):

@@ -1,6 +1,7 @@
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
 import tempfile
@@ -320,6 +321,17 @@ def instrument(paths, report_path):
     return report
 
 
+def configure_diagnostics(runtime):
+    if os.environ.get("YAPCHIK_DIAGNOSTICS") != "true":
+        return
+    path = runtime / "KeyDiagnostics.kt"
+    source = path.read_text(encoding="utf-8")
+    anchor = "private const val KEY_DIAGNOSTICS = false"
+    if source.count(anchor) != 1:
+        raise RuntimeError("Yapchik diagnostics flag changed; refusing an ambiguous diagnostic build")
+    path.write_text(source.replace(anchor, "private const val KEY_DIAGNOSTICS = true"), encoding="utf-8")
+
+
 def integrate(root):
     root = Path(root)
     if (root / "yapchik-coverage.json").exists():
@@ -346,6 +358,7 @@ def integrate(root):
     (root / "app/build.gradle.kts").write_text(app_gradle + '\ndependencies { implementation(project(":yapchik")) }\n', encoding="utf-8")
     runtime = root / "app/src/main/java/app/vela/yapchik"
     shutil.copytree(INTEGRATION / "runtime", runtime)
+    configure_diagnostics(runtime)
     tests = root / "app/src/test/java/app/vela/yapchik"
     shutil.copytree(INTEGRATION / "tests", tests)
     verify_integration(root)

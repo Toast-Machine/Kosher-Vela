@@ -14,6 +14,15 @@ on:
   schedule:
     - cron: '2-57/5 * * * *'
   workflow_dispatch:
+    inputs:
+      key_diagnostics:
+        description: Build a temporary key diagnostic APK without publishing or changing release state
+        type: boolean
+        default: false
+      release_tag:
+        description: Existing upstream release tag to use for key diagnostics
+        type: string
+        default: v0.5.2493
   repository_dispatch:
     types: [upstream-release]
 
@@ -22,9 +31,11 @@ permissions:
 
 env:
   RELEASE_STATE_BRANCH: ${{ github.ref_name }}
+  YAPCHIK_DIAGNOSTICS: ${{ github.event_name == 'workflow_dispatch' && inputs.key_diagnostics && 'true' || 'false' }}
+  DIAGNOSTIC_RELEASE_TAG: ${{ inputs.release_tag }}
 
 concurrency:
-  group: vela-release-sync
+  group: ${{ github.event_name == 'workflow_dispatch' && inputs.key_diagnostics && format('vela-key-diagnostics-{0}', github.ref_name) || 'vela-release-sync' }}
   cancel-in-progress: false
 
 jobs:
@@ -105,19 +116,28 @@ jobs:
           VELA_KEYSTORE_PASSWORD: ${{ secrets.VELA_KEYSTORE_PASSWORD }}
         run: python3 scripts/build.py variants
       - name: Publish with the original upstream tag and release status
+        if: env.YAPCHIK_DIAGNOSTICS != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/build.py publish
       - name: Record failure for delayed retry
-        if: failure()
+        if: failure() && env.YAPCHIK_DIAGNOSTICS != 'true'
         run: python3 scripts/sync.py failure
       - name: Save publication or failure receipt
-        if: always() && hashFiles('out/receipt/*.json') != ''
+        if: always() && env.YAPCHIK_DIAGNOSTICS != 'true' && hashFiles('out/receipt/*.json') != ''
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: receipt-${{ matrix.id }}
           path: out/receipt/*.json
           retention-days: 7
+          if-no-files-found: error
+      - name: Save temporary diagnostic APK and source
+        if: env.YAPCHIK_DIAGNOSTICS == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: key-diagnostics-${{ matrix.tag }}
+          path: out/assets/*
+          retention-days: 3
           if-no-files-found: error
       - name: Remove signing material
         if: always()
@@ -125,7 +145,7 @@ jobs:
 
   finish:
     needs: [plan, work]
-    if: always() && needs.plan.result == 'success'
+    if: always() && needs.plan.result == 'success' && !(github.event_name == 'workflow_dispatch' && inputs.key_diagnostics)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

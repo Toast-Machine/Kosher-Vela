@@ -12,6 +12,14 @@ from variants import VARIANTS, apply_features, configure_updater, customize
 
 
 class VariantTests(unittest.TestCase):
+    def test_diagnostic_apks_cannot_be_published(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            (directory / "kosher-vela-v1.apk").write_bytes(b"diagnostic")
+            (directory / "kosher-build.json").write_text(json.dumps({"key_diagnostics": True}))
+            with self.assertRaisesRegex(RuntimeError, "must not be published"):
+                validate_assets(directory, {"tag": "v1", "sha": "source"})
+
     def test_only_kosher_package_is_released_with_both_features(self):
         self.assertEqual({"kosher"}, set(VARIANTS))
         self.assertEqual("app.vela.kosher", VARIANTS["kosher"]["package"])

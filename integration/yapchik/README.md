@@ -34,6 +34,14 @@ the future hide-buttons feature needs explicit layout-independent eligibility te
 
 ## Validation
 
+For device key failures, manually dispatch the release workflow on the integration
+branch with `key_diagnostics=true` and an existing upstream `release_tag`. It builds
+only that tag and uploads a temporary signed APK/source artifact, without publishing
+or changing release state. The APK logs non-printing key events and the resolved
+Yapchik profile under `VelaYapchikKeys`; every event is delegated unchanged to Yapchik.
+Normal builds disable this observer. Diagnostic provenance is rejected by the release
+publication gate. Replace the diagnostic APK with a normal build after testing.
+
 Run from the automation repository with Python and Java/Javac 17 or newer:
 
 ```text

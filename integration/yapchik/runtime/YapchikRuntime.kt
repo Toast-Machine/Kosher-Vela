@@ -260,6 +260,7 @@ fun YapchikHost(content: @Composable () -> Unit) {
             Yapchik.autoDetector = { context -> app.vela.ui.isDpadFirstDevice(context) }
             Yapchik.install(activity.application)
         }
+        val removeDiagnostics = attachKeyDiagnostics(activity)
         active = Yapchik.isActive
         val listener = Yapchik.StateListener { active = it }
         Yapchik.addStateListener(listener)
@@ -268,6 +269,7 @@ fun YapchikHost(content: @Composable () -> Unit) {
         }
         lifecycle.addObserver(observer)
         onDispose {
+            removeDiagnostics()
             lifecycle.removeObserver(observer)
             Yapchik.removeStateListener(listener)
             store.removeOwner(owner)

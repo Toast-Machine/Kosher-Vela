@@ -1,12 +1,14 @@
 import json
+import os
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from kotlin_source import INTEGRATION, parse
-from yapchik import edits_for_file, instrument, ui_composables, vendor_digest, verify_vendor
+from yapchik import configure_diagnostics, edits_for_file, instrument, ui_composables, vendor_digest, verify_vendor
 
 
 class InstrumentationTests(unittest.TestCase):
@@ -263,6 +265,21 @@ import androidx.compose.runtime.Composable
         source = (INTEGRATION / "runtime/YapchikRuntime.kt").read_text(encoding="utf-8")
         self.assertIn("items(entries, key = { store.lazyKey(it.identity) })", source)
         self.assertNotIn("items(entries, key = { it.identity })", source)
+
+    def test_key_diagnostics_are_opt_in_and_delegate_to_yapchik(self):
+        source = (INTEGRATION / "runtime/KeyDiagnostics.kt").read_text(encoding="utf-8")
+        self.assertIn("val handled = wrapped.dispatchKeyEvent(event)", source)
+        self.assertIn("return handled", source)
+        with tempfile.TemporaryDirectory() as temporary:
+            runtime = Path(temporary)
+            path = runtime / "KeyDiagnostics.kt"
+            path.write_text(source, encoding="utf-8")
+            with patch.dict(os.environ, {"YAPCHIK_DIAGNOSTICS": "false"}):
+                configure_diagnostics(runtime)
+            self.assertEqual(source, path.read_text(encoding="utf-8"))
+            with patch.dict(os.environ, {"YAPCHIK_DIAGNOSTICS": "true"}):
+                configure_diagnostics(runtime)
+            self.assertIn("private const val KEY_DIAGNOSTICS = true", path.read_text(encoding="utf-8"))
 
     def test_vendor_digests_ignore_only_checkout_line_ending_conversion(self):
         path = Path(self.directory.name) / "vendor-line-endings.kt"

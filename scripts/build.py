@@ -128,6 +128,7 @@ def prepare(api, item, root, variant="kosher"):
         "features": VARIANTS[variant], "upstream_repository": UPSTREAM,
         "upstream_apk_sha256": hashlib.sha256(upstream_apk.read_bytes()).hexdigest(),
         "runtime_files": runtime_files, "automation_sha": os.environ["GITHUB_SHA"],
+        "key_diagnostics": os.environ.get("YAPCHIK_DIAGNOSTICS") == "true",
         "locked_settings": {"show_reviews": False, "live_reviews_panel": False,
                             "load_photos": False, "hide_external_links": True} if VARIANTS[variant]["kosher"] else {},
     }
@@ -210,6 +211,8 @@ def validate_assets(directory, item):
     for variant, features in VARIANTS.items():
         path = directory / f"{variant}-build.json"
         info = json.loads(path.read_text())
+        if info.get("key_diagnostics"):
+            raise RuntimeError("Diagnostic APKs must not be published as releases")
         if info["variant"] != variant or info["package"] != features["package"] or info["sha"] != item["sha"]:
             raise RuntimeError("Incorrect variant provenance: " + variant)
         safe_tag = re.sub(r"[^A-Za-z0-9._-]", "_", item["tag"])
