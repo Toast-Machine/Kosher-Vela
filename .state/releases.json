@@ -146,7 +146,7 @@
       "build_fingerprint": "cb76efc59222e6a06db0696f011dea6dc556097169f3f5aef5efe44eb4e29a3d",
       "metadata_fingerprint": "992866207ebf9dafd1fd5493cefe6ea89a4bf7e31f2cd4b48f24fdcab100f829",
       "kind": "build",
-      "retry_at": "2026-10-14T07:24:13.263109+00:00"
+      "retry_at": "2026-10-14T17:56:18.512999+00:00"
     },
     "410959708": {
       "id": "410959708",
@@ -169,30 +169,30 @@
       "build_fingerprint": "92d98e4ffdcc30a3dbd5b41008169cb2deceb2963095448cfd44aa936172d8b6",
       "metadata_fingerprint": "5794ea4d27764c2414a31e9c7110d1e4f96d997b5f39d454edbb5a07cddb7976",
       "kind": "build",
-      "retry_at": "2026-10-14T07:23:59.422027+00:00"
+      "retry_at": "2026-10-14T17:56:23.112112+00:00"
     },
-    "411864655": {
-      "id": "411864655",
+    "412534283": {
+      "id": "412534283",
       "tag": "canary",
-      "name": "Vela 0.5.2557-canary",
-      "sha": "afc83d7b37bdd233091edfe2653b4ca864ee52d9",
+      "name": "Vela 0.5.2567-canary",
+      "sha": "92e0482a4d652226485f79882cd5726e951a63c1",
       "prerelease": true,
-      "created_at": "2026-10-13T15:50:42Z",
-      "published_at": "2026-10-13T16:04:48Z",
-      "updated_at": "2026-10-13T16:04:48Z",
+      "created_at": "2026-10-14T09:11:22Z",
+      "published_at": "2026-10-14T09:19:52Z",
+      "updated_at": "2026-10-14T09:19:52Z",
       "assets": [
         {
-          "id": "RA_kwDOS7JZe84mAAhE",
+          "id": "RA_kwDOS7JZe84mI5I9",
           "name": "vela-maps-canary.apk",
-          "size": 116534461,
-          "updatedAt": "2026-10-13T16:04:47Z",
+          "size": 116555861,
+          "updatedAt": "2026-10-14T09:19:51Z",
           "downloadUrl": "https://github.com/PimpinPumpkin/Vela/releases/download/canary/vela-maps-canary.apk"
         }
       ],
-      "build_fingerprint": "75d9162a53a31d8f749698eba82d681b1b922deffc09a0cd6ea1c3c0c66a4849",
-      "metadata_fingerprint": "0f49ebbea20bbd8af70934b7db9d7f9fa2231fbca06c420c224707996e7e8662",
+      "build_fingerprint": "928562cf37b72f085c9604cd180b4543ecc2a7cc4c46fc15254950bf025a939f",
+      "metadata_fingerprint": "2021e88f7dbfc4690ece61de12eb1dfe6b2f9bca1040ebcaa02deffe1269843e",
       "kind": "build",
-      "retry_at": "2026-10-14T07:24:48.061254+00:00"
+      "retry_at": "2026-10-14T17:57:07.814815+00:00"
     }
   }
 }
