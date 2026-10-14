@@ -157,7 +157,7 @@ import androidx.compose.runtime.Composable
         self.assertLess(transformed.index('R.string.settings_appearance'), transformed.index('title = "Yapchik"'))
         self.assertLess(transformed.index('title = "Yapchik"'), transformed.index('R.string.settings_map'))
         self.assertIn('HubRow(icon = app.vela.ui.icons.SymOutlined.Settings', transformed)
-        self.assertIn('showYapchikPreferences(yapchikContext)', transformed)
+        self.assertIn('onOpen(SettingsSection.YAPCHIK, null)', transformed)
         self.assertNotIn('YapchikPreferences()', transformed)
 
     def test_changed_settings_hub_fails_closed(self):
@@ -165,6 +165,30 @@ import androidx.compose.runtime.Composable
         path.write_text('package app.vela.ui.settings\nfun SettingsHub() {}', encoding='utf-8')
         with self.assertRaisesRegex(RuntimeError, 'requiring review'):
             instrument([path], Path(self.directory.name) / 'settings-changed.json')
+
+    def test_partial_sheet_does_not_hide_visible_map_controls(self):
+        source = '''package fixture
+import androidx.compose.runtime.Composable
+@Composable fun Screen() { PlaceSheet(); FullScreenReviewsContent() }
+@Composable fun PlaceSheet() {}
+@Composable fun FullScreenReviewsContent() {}
+'''
+        path = Path(self.directory.name) / 'PartialSheet.kt'
+        path.write_text(source, encoding='utf-8')
+        instrument([path], Path(self.directory.name) / 'partial-sheet.json')
+        transformed = path.read_text(encoding='utf-8')
+        self.assertEqual(1, transformed.count('YapchikScope(blocking = true)'))
+        self.assertLess(transformed.index('PlaceSheet()'), transformed.index('YapchikScope(blocking = true)'))
+        self.assertLess(transformed.index('YapchikScope(blocking = true)'), transformed.index('FullScreenReviewsContent()'))
+
+    def test_yapchik_settings_has_native_navigation_destination(self):
+        routes = Path(self.directory.name) / 'SettingsRoutes.kt'
+        screen = Path(self.directory.name) / 'SettingsScreen.kt'
+        routes.write_text('package fixture\nenum class SettingsSection { HUB, APPEARANCE, MAP }', encoding='utf-8')
+        screen.write_text('package fixture\nfun screen(section: SettingsSection) { when(section) { SettingsSection.APPEARANCE -> appearance(); else -> hub() } }', encoding='utf-8')
+        instrument([routes, screen], Path(self.directory.name) / 'settings-route.json')
+        self.assertIn('HUB, APPEARANCE, YAPCHIK,', routes.read_text(encoding='utf-8'))
+        self.assertIn('SettingsSection.YAPCHIK -> YapchikSettingsScreen(onBack = toHub)', screen.read_text(encoding='utf-8'))
 
     def test_options_dimensions_and_overflow_remain_bounded(self):
         source = (INTEGRATION / 'runtime/YapchikRuntime.kt').read_text(encoding='utf-8')

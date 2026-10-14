@@ -44,14 +44,17 @@ def main():
             "-no-stdlib", "-no-reflect", "-jvm-target", "17", "-classpath", classpath,
             "-d", classes, str(INTEGRATION / "runtime/ActionStore.kt"),
             str(INTEGRATION / "runtime/MenuPresentation.kt"),
+            str(INTEGRATION / "runtime/MenuKeyGestures.kt"),
             str(INTEGRATION / "tests/ActionStoreTest.kt"),
             str(INTEGRATION / "tests/MenuPresentationTest.kt"),
+            str(INTEGRATION / "tests/MenuKeyGesturesTest.kt"),
             str(source), str(INTEGRATION / "compiler-fixtures/ComposeAnnotation.kt"),
             str(INTEGRATION / "compiler-fixtures/ItemScope.kt"),
         ], check=True)
         subprocess.run([
             "java", "-cp", classes + os.pathsep + classpath,
             "org.junit.runner.JUnitCore", "app.vela.yapchik.ActionStoreTest", "app.vela.yapchik.MenuPresentationTest",
+            "app.vela.yapchik.MenuKeyGesturesTest",
         ], check=True)
 
 

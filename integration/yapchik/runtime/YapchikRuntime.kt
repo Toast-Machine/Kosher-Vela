@@ -45,7 +45,11 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.theonionsarewatching.yapchik.SoftkeyMode
 import com.theonionsarewatching.yapchik.Softkeys
 import com.theonionsarewatching.yapchik.Yapchik
-import com.theonionsarewatching.yapchik.YapchikSettingsDialog
+import android.view.View
+import android.view.ViewGroup
+import android.view.Window
+import android.widget.TextView
+import com.theonionsarewatching.yapchik.SoftkeyBar
 import kotlin.math.ceil
 
 private val LocalStore = staticCompositionLocalOf<ActionStore<ActionVisual>?> { null }
@@ -256,12 +260,31 @@ fun YapchikHost(content: @Composable () -> Unit) {
     var active by remember { mutableStateOf(false) }
     var foreground by remember { mutableStateOf(lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) }
     val theme = MaterialTheme.colorScheme
+    val menuHandler = remember { mutableStateOf<((KeyEvent) -> Unit)?>(null) }
+    val currentMenuOpen = rememberUpdatedState(menuOpen)
     DisposableEffect(activity, lifecycle) {
         if (!Yapchik.isInstalled) {
             Yapchik.autoDetector = { context -> app.vela.ui.isDpadFirstDevice(context) }
             Yapchik.install(activity.application)
         }
         val removeDiagnostics = attachKeyDiagnostics(activity)
+        Softkeys.of(activity)
+        val window = activity.window
+        val wrapped = window.callback
+        val gestures = MenuKeyGestures()
+        val gate = object : Window.Callback by wrapped {
+            override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+                val menuKey = event.keyCode in listOf(KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN,
+                    KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER)
+                if (menuKey && gestures.consume(event.keyCode, event.action == KeyEvent.ACTION_DOWN,
+                        currentMenuOpen.value)) {
+                    menuHandler.value?.invoke(event)
+                    return true
+                }
+                return wrapped.dispatchKeyEvent(event)
+            }
+        }
+        window.callback = gate
         active = Yapchik.isActive
         val listener = Yapchik.StateListener { active = it }
         Yapchik.addStateListener(listener)
@@ -270,6 +293,7 @@ fun YapchikHost(content: @Composable () -> Unit) {
         }
         lifecycle.addObserver(observer)
         onDispose {
+            if (window.callback === gate) window.callback = wrapped
             removeDiagnostics()
             lifecycle.removeObserver(observer)
             Yapchik.removeStateListener(listener)
@@ -293,18 +317,19 @@ fun YapchikHost(content: @Composable () -> Unit) {
                 if (search != null) right("Search") { store.dispatch(search.identity) { menuOpen = false } }
             }
         }
+        applyBarTheme(activity.window.decorView)
     }
     LaunchedEffect(active, foreground, currentRevision) {
         if (!active || !foreground || store.suppressed) menuOpen = false
     }
     Box(Modifier.fillMaxSize()) {
         CompositionLocalProvider(LocalStore provides store, LocalOwner provides owner) { content() }
-        if (menuOpen && active && foreground && !store.suppressed) OptionsMenu(store) { menuOpen = false }
+        if (menuOpen && active && foreground && !store.suppressed) OptionsMenu(store, menuHandler) { menuOpen = false }
     }
 }
 
 @Composable
-private fun OptionsMenu(store: ActionStore<ActionVisual>, dismiss: () -> Unit) {
+private fun OptionsMenu(store: ActionStore<ActionVisual>, handler: MutableState<((KeyEvent) -> Unit)?>, dismiss: () -> Unit) {
     val entries = store.options()
     var focused by remember { mutableStateOf<ActionIdentity?>(null) }
     var previousIndex by remember { mutableIntStateOf(0) }
@@ -317,27 +342,37 @@ private fun OptionsMenu(store: ActionStore<ActionVisual>, dismiss: () -> Unit) {
     }
     LaunchedEffect(focused, identities) {
         val index = identities.indexOf(focused)
-        if (index >= 0) { previousIndex = index; scroll.scrollToItem(index) }
+        if (index >= 0) {
+            previousIndex = index
+            val layout = scroll.layoutInfo
+            val visible = layout.visibleItemsInfo.firstOrNull { it.index == index }
+            if (visible == null || visible.offset < layout.viewportStartOffset) scroll.scrollToItem(index)
+            else if (visible.offset + visible.size > layout.viewportEndOffset)
+                scroll.scrollToItem(layout.visibleItemsInfo.first().index,
+                    scroll.firstVisibleItemScrollOffset + visible.offset + visible.size - layout.viewportEndOffset)
+        }
     }
     BackHandler(onBack = dismiss)
-    val menuKeys = Modifier.focusRequester(requester).onPreviewKeyEvent { event ->
-        val native = event.nativeKeyEvent
-        if (native.action != KeyEvent.ACTION_DOWN) false else when (native.keyCode) {
+    val currentHandler = rememberUpdatedState<(KeyEvent) -> Unit> { native ->
+        when (native.keyCode) {
             KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN -> {
-                if (entries.isNotEmpty()) {
+                if (native.action == KeyEvent.ACTION_DOWN && entries.isNotEmpty()) {
                     val step = if (native.keyCode == KeyEvent.KEYCODE_DPAD_UP) -1 else 1
                     val index = identities.indexOf(focused).coerceAtLeast(0)
                     focused = identities[(index + step).coerceIn(0, entries.lastIndex)]
                 }
-                true
             }
-            KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
-                focused?.let { store.dispatch(it, dismiss) }
-                true
+            KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -> {
+                if (native.action == KeyEvent.ACTION_UP && !native.isCanceled)
+                    focused?.let { store.dispatch(it, dismiss) }
             }
-            else -> false
         }
-    }.focusable()
+    }
+    DisposableEffect(handler) {
+        handler.value = { currentHandler.value(it) }
+        onDispose { handler.value = null }
+    }
+    val menuKeys = Modifier.focusRequester(requester).focusable()
     BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding().padding(8.dp)) {
         Box(Modifier.fillMaxSize().clickable(
             interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = dismiss,
@@ -406,6 +441,14 @@ private fun ScaleToMenuWidth(content: @Composable () -> Unit) {
     }
 }
 
-fun showYapchikPreferences(context: Context) {
-    YapchikSettingsDialog.show(context.activity())
+private fun applyBarTheme(view: View) {
+    if (view is SoftkeyBar) {
+        view.setBackgroundColor(Yapchik.style.backgroundColor)
+        view.getChildAt(0)?.setBackgroundColor(Yapchik.style.dividerColor)
+        fun labels(child: View) {
+            if (child is TextView) child.setTextColor(Yapchik.style.textColor)
+            if (child is ViewGroup) for (index in 0 until child.childCount) labels(child.getChildAt(index))
+        }
+        labels(view)
+    } else if (view is ViewGroup) for (index in 0 until view.childCount) applyBarTheme(view.getChildAt(index))
 }

@@ -28,7 +28,9 @@ Value-returning composables and expression bodies with unknown inferred return t
 remain unchanged, so remembered state/focus objects retain their original values.
 
 Known app adapters cover the Activity root, Search activation, persistent map ownership,
-blocking panel content, and the settings entry. Upstream changes to these require review.
+full-screen blocking content, and the settings entry. Partial sheets retain visible
+map actions; native modal windows still suppress the app menu. Upstream changes to
+these adapters require review.
 Gesture-only controls and map-key redesign are excluded. Touch controls remain visible;
 the future hide-buttons feature needs explicit layout-independent eligibility tests.
 
@@ -69,7 +71,16 @@ bottom-start above system insets. The list scrolls and follows D-pad focus; over
 wide rows scale their complete presentation uniformly rather than truncate labels.
 The Yapchik entry uses the upstream Settings hub's own themed `HubRow`, inserted
 directly after Appearance through a validated PSI anchor. It opens the existing
-Yapchik settings dialog; a changed insertion anchor fails coverage validation.
+native Settings destination using the app's `SettingsScaffold`, `SettingsGroup`,
+and `SelectableRow`. Mode/profile changes and calibration use Yapchik's public
+APIs and persistence; a changed insertion anchor fails coverage validation.
+
+The bar reapplies the current Material theme to existing Yapchik views, because
+the pinned library reads bar colors only at construction. Options intercepts
+complete standard navigation/activation gestures at the window boundary before
+underlying Compose controls see them, including releases after dismissal. Physical
+softkeys remain owned by Yapchik and its selected device profile. Selection scrolls
+only when a row falls outside the list viewport, not on every D-pad press.
 
 Run from the automation repository with Python and Java/Javac 17 or newer:
 

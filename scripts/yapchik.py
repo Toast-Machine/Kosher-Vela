@@ -278,7 +278,7 @@ def edits_for_file(file, composables=None):
             site = json.dumps(file["package"] + "." + path.stem + ":component:" + str(call["span"][0]))
             edits.append((call["full"][0], call["full"][0], RUNTIME + f"YapchikItem({site}, Unit) {{ "))
             edits.append((call["full"][1], call["full"][1], " }"))
-        if symbol in composables and (name.endswith("Sheet") or name in {"FullScreenReviewsContent", "PhotoGalleryContent", "StreetViewScreen"}):
+        if symbol in composables and name in {"FullScreenReviewsContent", "PhotoGalleryContent", "StreetViewScreen"}:
             edits.append((call["full"][0], call["full"][0], RUNTIME + "YapchikScope(blocking = true) { "))
             edits.append((call["full"][1], call["full"][1], " }"))
 
@@ -323,10 +323,24 @@ def edits_for_file(file, composables=None):
             report["unsupported"].append({"file": path.name, "reason": "Softkey settings insertion point changed"})
         else:
             point = appearance[0]["full"][1]
-            insert([point, point], '\nval yapchikContext = androidx.compose.ui.platform.LocalContext.current\n'
+            insert([point, point], '\n'
                    'HubRow(icon = app.vela.ui.icons.SymOutlined.Settings, title = "Yapchik", '
                    'subtitle = "Hardware softkeys and key calibration", '
-                   'onClick = { ' + RUNTIME + 'showYapchikPreferences(yapchikContext) })\n')
+                   'onClick = { onOpen(SettingsSection.YAPCHIK, null) })\n')
+    if path.name == "SettingsRoutes.kt":
+        anchor = "HUB, APPEARANCE,"
+        if source.decode().count(anchor) != 1:
+            report["unsupported"].append({"file": path.name, "reason": "Settings routes changed"})
+        else:
+            point = source.index(anchor.encode()) + len(anchor)
+            insert([point, point], " YAPCHIK,")
+    if path.name == "SettingsScreen.kt":
+        anchor = "SettingsSection.APPEARANCE ->"
+        if source.decode().count(anchor) != 1:
+            report["unsupported"].append({"file": path.name, "reason": "Settings navigation changed"})
+        else:
+            point = source.index(anchor.encode())
+            insert([point, point], "SettingsSection.YAPCHIK -> YapchikSettingsScreen(onBack = toHub)\n")
     return rewrite(source, edits), report
 
 
@@ -376,6 +390,8 @@ def integrate(root):
     root = Path(root)
     if (root / "yapchik-coverage.json").exists():
         raise RuntimeError("Yapchik instrumentation must run once on a fresh checkout")
+    shutil.copyfile(INTEGRATION / "settings/YapchikSettings.kt",
+                    root / "app/src/main/java/app/vela/ui/settings/YapchikSettings.kt")
     paths = list((root / "app/src/main/java/app/vela/ui").rglob("*.kt"))
     paths.append(root / "app/src/main/java/app/vela/MainActivity.kt")
     report = instrument(paths, root / "yapchik-coverage.json")
