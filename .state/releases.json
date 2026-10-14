@@ -36,25 +36,25 @@
     "407070302": {
       "tag": "v0.5.2435",
       "source_sha": "9f8b684779c36debdd3ea8940091e0beeeb6be5a",
-      "build_fingerprint": "6dd3f073ba2c180bdba86cd7608bfa4e7891f5dd85e2457a2caf5c7c7f3c6151",
+      "build_fingerprint": "26435298ac8cfa1ccfbd0f33ce5507934ab898aff2088b62fcd0621c2d2a53f9",
       "metadata_fingerprint": "3129bcab43b4607536fba7b86235a6cf4291b22a66764e10380391b18f53114e"
     },
     "407163615": {
       "tag": "v0.5.2444",
       "source_sha": "4c2dad1fd16404574c95c6daa0f2d6e600c1b728",
-      "build_fingerprint": "089ed79ba08b4ef0f5c83a84c7b3032920cecf59af8181f0373af05f927211cc",
+      "build_fingerprint": "cc31e3969b093e48152b9bd954739c518a9560ee47786d4ac0373d284ce695a6",
       "metadata_fingerprint": "f44953f5eb8ad37689bfd1d17900a3ed5064df72ac69a3ea0bf4c3fbf390f9c9"
     },
     "406007530": {
       "tag": "v0.4.2373",
       "source_sha": "6daa576f7242cb3c6189afdb2044c44396019385",
-      "build_fingerprint": "bfe749af27cb327042723e28dd05c9b04056d1e9627e86de63a4959cd085e711",
+      "build_fingerprint": "4033fc9f045f598f5f2f8dad9de30101f5fffbe07607927647ce0de6264b4cbf",
       "metadata_fingerprint": "f104bc5f4629bc701ca82658e913ab72bfeecb7898157e8c87ecd6495a8bd13f"
     },
     "406942601": {
       "tag": "v0.5.2426",
       "source_sha": "163d4699150e8bc0cb236a99b56305506a758236",
-      "build_fingerprint": "abd73f1a7223f77ca0d6b359ca496bbe7510e2768063f8f7ac13b5e5454a3555",
+      "build_fingerprint": "c7b2f77701e7eaa20caa7d6a42da946c35a7db3d632c7012f5c2edafe284899f",
       "metadata_fingerprint": "fd9c4d32ca308c61d4e4d49585a3d46f015ba2616d656b85685c2c3377759f89"
     },
     "407341870": {
@@ -66,7 +66,7 @@
     "408154876": {
       "tag": "v0.5.2459",
       "source_sha": "2b3f007a924fc9559d62bee9b4574cb880b41f50",
-      "build_fingerprint": "f57ec8547f7a738e597933c55cf31ddba467be774c515ae751cb54276e806bcc",
+      "build_fingerprint": "ec63f564925d1b2a3e5d72d17eb6502488f53abfe1cad1586e8ae2c9b7235112",
       "metadata_fingerprint": "b5201436bc03acb2b0a71389b671f214da13a583075ce7fae85b08f31ca69ec0"
     },
     "408407005": {
@@ -96,7 +96,7 @@
     "409051564": {
       "tag": "v0.5.2484",
       "source_sha": "ce1c9a2a0f9593aa6e6d4de02798911e8b1f6b62",
-      "build_fingerprint": "1e90b4a285c879fe12fcd32c853dc3dc7663afbf4d834402098043b44cc89243",
+      "build_fingerprint": "a34d65367188844187c17d8342ab6ec35696d75dc77298d191345c08373a8fbd",
       "metadata_fingerprint": "21083916944372dcf7ed3862c6583e74d99dc01601dbb944addd8e566e0d2c81"
     },
     "409199840": {
@@ -143,10 +143,10 @@
           "downloadUrl": "https://github.com/PimpinPumpkin/Vela/releases/download/v0.5.2538/vela-maps-v0.5.2538.apk"
         }
       ],
-      "build_fingerprint": "cb76efc59222e6a06db0696f011dea6dc556097169f3f5aef5efe44eb4e29a3d",
+      "build_fingerprint": "7d6590f354fb6a9111d14b1967fe19d99fa75465ea1299c1479caf1a19cab547",
       "metadata_fingerprint": "992866207ebf9dafd1fd5493cefe6ea89a4bf7e31f2cd4b48f24fdcab100f829",
       "kind": "build",
-      "retry_at": "2026-10-14T17:56:18.512999+00:00"
+      "retry_at": "2026-10-15T02:45:37.478431+00:00"
     },
     "410959708": {
       "id": "410959708",
@@ -166,10 +166,10 @@
           "downloadUrl": "https://github.com/PimpinPumpkin/Vela/releases/download/v0.5.2549/vela-maps-v0.5.2549.apk"
         }
       ],
-      "build_fingerprint": "92d98e4ffdcc30a3dbd5b41008169cb2deceb2963095448cfd44aa936172d8b6",
+      "build_fingerprint": "a1399633e334503338a7d616692c0672e07f886f9d397e75224a8eb06d122a88",
       "metadata_fingerprint": "5794ea4d27764c2414a31e9c7110d1e4f96d997b5f39d454edbb5a07cddb7976",
       "kind": "build",
-      "retry_at": "2026-10-14T17:56:23.112112+00:00"
+      "retry_at": "2026-10-15T02:46:25.452318+00:00"
     },
     "412534283": {
       "id": "412534283",
@@ -189,10 +189,10 @@
           "downloadUrl": "https://github.com/PimpinPumpkin/Vela/releases/download/canary/vela-maps-canary.apk"
         }
       ],
-      "build_fingerprint": "928562cf37b72f085c9604cd180b4543ecc2a7cc4c46fc15254950bf025a939f",
+      "build_fingerprint": "3cbab703cb64acbbecf3fa8d2e4a54237b92ea32740e1750377ed25be1eb2dd1",
       "metadata_fingerprint": "2021e88f7dbfc4690ece61de12eb1dfe6b2f9bca1040ebcaa02deffe1269843e",
       "kind": "build",
-      "retry_at": "2026-10-14T17:57:07.814815+00:00"
+      "retry_at": "2026-10-15T02:47:16.173041+00:00"
     }
   }
 }
