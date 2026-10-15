@@ -65,6 +65,24 @@ class VariantTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "selection changed"):
                 configure_updater(root, "kosher")
 
+    def test_shared_updater_does_not_redirect_resource_downloads(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            updater = root / "app/src/main/java/app/vela/update/SelfUpdater.kt"
+            updater.parent.mkdir(parents=True)
+            links = root / "core/src/main/java/app/vela/core/config/VelaLinks.kt"
+            links.parent.mkdir(parents=True)
+            defaults = 'val releases = "https://github.com/PimpinPumpkin/Vela/releases/download"'
+            links.write_text(defaults)
+            updater.write_text('val url = app.vela.core.config.VelaLinks.api("/releases/latest")\n'
+                               'val all = (0 until assets.length()).map { assets.getJSONObject(it) }')
+            configure_updater(root, "kosher")
+            source = updater.read_text()
+            self.assertIn('"https://api.github.com/repos/Toast-Machine/Kosher-Vela" + "/releases/latest"', source)
+            self.assertIn('startsWith("kosher-vela-")', source)
+            self.assertNotIn("VelaLinks.api(", source)
+            self.assertEqual(defaults, links.read_text())
+
     def test_release_requires_kosher_apk_and_source_archive(self):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)

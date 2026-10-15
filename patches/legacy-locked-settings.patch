@@ -115,26 +115,6 @@
 -    private const val KEY = "live_reviews_panel"
 +    fun set(context: Context, value: Boolean) = Unit
  }
---- a/app/src/main/java/app/vela/ui/settings/SettingsHub.kt
-+++ b/app/src/main/java/app/vela/ui/settings/SettingsHub.kt
-@@ -317,17 +317,11 @@
-     R.string.settings_show_transit_stops to SettingsSection.PLACES,
-     R.string.settings_poi_icon_size to SettingsSection.PLACES,
-     // Places (place pages)
--    R.string.settings_show_reviews to SettingsSection.PLACES,
--    R.string.settings_reviews_on_tap to SettingsSection.PLACES,
-     R.string.settings_nav_north_up to SettingsSection.NAVIGATION,
-     R.string.settings_puck_shape to SettingsSection.NAVIGATION,
--    R.string.settings_photos_on_tap to SettingsSection.PLACES,
-     R.string.settings_details_retry to SettingsSection.PLACES,
-     R.string.settings_route_traffic_on_tap to SettingsSection.PRIVACY,
--    R.string.settings_read_all_reviews to SettingsSection.PLACES,
--    R.string.settings_load_photos to SettingsSection.PLACES,
-     R.string.settings_hide_adult to SettingsSection.PLACES,
--    R.string.settings_hide_external_links to SettingsSection.PLACES,
-     // Navigation
-     R.string.settings_keep_screen_on to SettingsSection.NAVIGATION,
-     R.string.settings_route_picker to SettingsSection.NAVIGATION,
 --- a/app/src/main/java/app/vela/ui/settings/sections/PlacesSettings.kt
 +++ b/app/src/main/java/app/vela/ui/settings/sections/PlacesSettings.kt
 @@ -28,45 +28,6 @@

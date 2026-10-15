@@ -63,7 +63,10 @@ tamper-proof device-management system. Other upstream features are not silently 
   The app continues to download those resources from upstream.
 - Builds use the upstream tag's exact commit and read the version name/code from its APK.
   The in-app APK updater points here, not to upstream Vela.
-- Patches must apply cleanly. Static policy/instrumentation checks, Kotlin regression tests and APK identity /
+- Settings-search entries are removed by exact setting key within `SEARCH_INDEX`, independent
+  of neighboring entries or their order. Missing/duplicate entries or an unrecognized list
+  structure stop the build for review. Settings-locking patches must still apply cleanly.
+  Static policy/instrumentation checks, Kotlin regression tests and APK identity /
   signature checks must pass before publication. Failed releases remain pending and retry
   after six hours, or immediately on a manual workflow run or a changed upstream build;
   successful releases are recorded independently even when another build fails.
