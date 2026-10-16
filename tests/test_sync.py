@@ -10,8 +10,9 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from sync import (fingerprints, initial_state, list_releases, pending_releases, planned_releases, prune_failures,
-                  keepalive, read_remote_state, record_completion, state_branch, state_commit_message)
+from sync import (UpstreamChanged, current_release, fingerprints, initial_state, list_releases, pending_releases,
+                  planned_releases, prune_failures, keepalive, read_remote_state, record_completion, state_branch,
+                  state_commit_message)
 
 
 def release(number, tag=None):
@@ -180,6 +181,18 @@ class ReleaseTrackingTests(unittest.TestCase):
         state["failed"] = {"1": {"tag": "canary"}, "2": {"tag": "canary"}}
         self.assertEqual(prune_failures(state, {recut["id"]}), 1)
         self.assertEqual(list(state["failed"]), ["2"])
+
+    def test_superseded_release_raises_upstream_changed(self):
+        item = {**release(7, "canary"), "kind": "build"}
+        api = Mock()
+        api.request.side_effect = lambda path: (
+            {"object": {"type": "commit", "sha": item["sha"]}} if "/git/ref/" in path else {
+                "id": 8, "draft": False, "name": "Vela 8", "prerelease": True, "updated_at": item["updated_at"],
+                "assets": [{"node_id": "RA_8", "name": "vela.apk", "size": 100, "updated_at": item["updated_at"],
+                            "browser_download_url": "https://example.com/app.apk"}],
+            })
+        with self.assertRaises(UpstreamChanged):
+            current_release(api, item)
 
     def test_state_commit_message_describes_what_changed(self):
         self.assertEqual(state_commit_message(1, 0, 0), "Record 1 published release")

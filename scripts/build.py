@@ -12,7 +12,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 from github_api import GitHub
-from sync import DESTINATION, UPSTREAM, current_release, write_json
+from sync import DESTINATION, UPSTREAM, UpstreamChanged, current_release, write_json
 from variants import VARIANTS, customize, verify_variant
 
 
@@ -284,9 +284,17 @@ if __name__ == "__main__":
         package(args.source, args.variant)
     else:
         item = json.loads(os.environ["RELEASE_JSON"])
-        if args.command == "prepare":
-            prepare(GitHub(), item, args.source, args.variant)
-        elif args.command == "variants":
-            build_variants(GitHub(), item, args.source)
-        else:
-            publish(GitHub(), item)
+        try:
+            if args.command == "prepare":
+                prepare(GitHub(), item, args.source, args.variant)
+            elif args.command == "variants":
+                build_variants(GitHub(), item, args.source)
+            else:
+                publish(GitHub(), item)
+        except UpstreamChanged as error:
+            # A superseded release is not a failure: skip it without a receipt so
+            # the next poll plans the replacement, and don't send a failure email.
+            print(f"::notice::{item['tag']} skipped: {error}")
+            if os.environ.get("GITHUB_OUTPUT"):
+                with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+                    output.write("superseded=true\n")

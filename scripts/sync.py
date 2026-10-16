@@ -156,6 +156,10 @@ def resolve_tag(api, tag):
     return target["sha"]
 
 
+class UpstreamChanged(RuntimeError):
+    """Upstream replaced the release mid-run; the next poll builds the new one."""
+
+
 def current_release(api, item):
     release = api.request(f"repos/{UPSTREAM}/releases/tags/{quote(item['tag'], safe='')}")
     if release["draft"]:
@@ -172,7 +176,7 @@ def current_release(api, item):
     }
     build, metadata = fingerprints(normalized)
     if build != item["build_fingerprint"]:
-        raise RuntimeError("Upstream changed while this build ran; retry the current release next poll")
+        raise UpstreamChanged("Upstream changed while this build ran; retry the current release next poll")
     return release, {**normalized, "build_fingerprint": build, "metadata_fingerprint": metadata}
 
 

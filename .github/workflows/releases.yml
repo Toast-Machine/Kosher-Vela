@@ -109,6 +109,7 @@ jobs:
         if: matrix.kind == 'build'
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c
       - name: Build and verify Kosher Vela with Yapchik and kashering
+        id: build
         if: matrix.kind == 'build'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -116,7 +117,7 @@ jobs:
           VELA_KEYSTORE_PASSWORD: ${{ secrets.VELA_KEYSTORE_PASSWORD }}
         run: python3 scripts/build.py variants
       - name: Publish with the original upstream tag and release status
-        if: env.YAPCHIK_DIAGNOSTICS != 'true'
+        if: env.YAPCHIK_DIAGNOSTICS != 'true' && steps.build.outputs.superseded != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/build.py publish
