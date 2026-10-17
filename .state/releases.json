@@ -158,6 +158,12 @@
       "source_sha": "a501647be1c8bd2036c22878d00349796462a71c",
       "build_fingerprint": "32a6b1487f1e7d1a55a197f6856c551e4303e9dae60b1f99e5b4b95d5b0b7022",
       "metadata_fingerprint": "f4bd191d3a63af96d37be52b45fb9eab48495587cc7b581ef7aefa33d861efb0"
+    },
+    "415832110": {
+      "tag": "v0.5.2600",
+      "source_sha": "bf5847963caf1961ffc6127d4cb94b491d316ecd",
+      "build_fingerprint": "9efbd1675427ca5e2c807ecf4c20d88b3a251c2e2f5afc88a4cfe503dd1c7952",
+      "metadata_fingerprint": "620c6ddc709f9924ad898c4e748dbec8c84de939fde6c90a3701c5c339bd10e8"
     }
   },
   "failed": {}
