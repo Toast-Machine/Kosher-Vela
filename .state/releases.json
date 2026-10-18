@@ -182,6 +182,12 @@
       "source_sha": "76eabcd1bfd4c522346844518c1c39453c2e677c",
       "build_fingerprint": "faf373f342d88ee16ed05769fc7f4ed013a2b4806ecfc6c49df2ea6941d5fdfe",
       "metadata_fingerprint": "1b471cfc8b53054e727d06510763038094786dca12b2187358f1f4e8287dc67e"
+    },
+    "416489003": {
+      "tag": "v0.5.2612",
+      "source_sha": "a3cbcd15a458a7db1e048e1aaa9fc5ce20a02c52",
+      "build_fingerprint": "98d986eb254a8a2847070cee5b9e6f25241d6f0f2cf674d3345e441e7f1d92fa",
+      "metadata_fingerprint": "38c359a69740e738d9c4d122b3297e966edf30e7f8ee3ccddb66ff2c7e89ae84"
     }
   },
   "failed": {}
