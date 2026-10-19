@@ -194,6 +194,12 @@
       "source_sha": "575d15ae5562cd03f1d17fa02b411cdb300d1de5",
       "build_fingerprint": "2f56bbcb4c3c2ec5d38a2d8e8f2197b4e00a3a5d8d55e03c49436ad3e1b81805",
       "metadata_fingerprint": "4d50c6dcb46d6f5c495c1e826e4b7c4bd3b738826dd172d6a145cb77f98990f5"
+    },
+    "417546359": {
+      "tag": "v0.5.2621",
+      "source_sha": "94a83b86de37c9c8cd704167b927888da155b6d9",
+      "build_fingerprint": "b0387142e76bae2639661638626bea09ce6d0abda8e31796c873c5d55d1a99d5",
+      "metadata_fingerprint": "d8fc42cacb00614382b493ccca987b4ad5352b911a710c132a5b12829f2e6725"
     }
   },
   "failed": {}
