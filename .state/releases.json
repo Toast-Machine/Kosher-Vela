@@ -200,6 +200,12 @@
       "source_sha": "94a83b86de37c9c8cd704167b927888da155b6d9",
       "build_fingerprint": "b0387142e76bae2639661638626bea09ce6d0abda8e31796c873c5d55d1a99d5",
       "metadata_fingerprint": "dcc282fd9f321ef35c0af0062a387d6ffde9ce6e75f8236715b79358d6856bbc"
+    },
+    "418034629": {
+      "tag": "canary",
+      "source_sha": "9c974dd8f69a7dcbe8aeaa507b4e73ddc28a834e",
+      "build_fingerprint": "bd5a90bbec0db914e33fbf7141e86439e18d39d0a7b8afa1a4c67222f91fda94",
+      "metadata_fingerprint": "d267fed4d01c52c074d21bfcc23dc977500977a1702e9b5084b51672e6f76c73"
     }
   },
   "failed": {}
