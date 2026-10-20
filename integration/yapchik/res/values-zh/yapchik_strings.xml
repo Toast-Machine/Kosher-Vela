@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">软键</string>
+    <string name="yapchik_settings_sub">软键栏、按键布局</string>
+    <string name="yapchik_settings_intro">在按键手机上，屏幕底部的软键栏会显示屏幕下方两个按键的功能。左键打开“选项”，列出当前屏幕上可执行的操作。在地图上，右键打开搜索。</string>
+    <string name="yapchik_softkey_bar">软键栏</string>
+    <string name="yapchik_mode_on">开启</string>
+    <string name="yapchik_mode_off">关闭</string>
+    <string name="yapchik_mode_auto">自动（在按键手机上开启）</string>
+    <string name="yapchik_key_layout">按键布局</string>
+    <string name="yapchik_profile_universal">所有已知软键</string>
+    <string name="yapchik_profile_standard">标准软键</string>
+    <string name="yapchik_profile_menu_back">菜单键和返回键</string>
+    <string name="yapchik_profile_function">F1 和 F2 键</string>
+    <string name="yapchik_profile_custom">自定义（检测我的按键）</string>
+    <string name="yapchik_keys_hint">左键：%1$s。右键：%2$s。</string>
+    <string name="yapchik_options">选项</string>
+    <string name="yapchik_search">搜索</string>
+    <string name="yapchik_no_actions">没有可用的操作</string>
+    <string name="yapchik_nav_space">导航栏空间</string>
+    <string name="yapchik_nav_space_auto">自动（屏幕上有导航栏时）</string>
+    <string name="yapchik_nav_space_hint">加高软键栏，使其标签保持在屏幕导航栏上方。</string>
+</resources>

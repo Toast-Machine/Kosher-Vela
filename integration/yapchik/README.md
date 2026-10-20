@@ -66,14 +66,37 @@ entry has no text label. Text-labeled entries retain their original presentation
 unlabeled controls without descriptions receive no invented names. Rows merge
 descendant semantics, and fallback labels are not duplicated on their icons.
 
-Options is constrained to half the available width and height, anchored at the
-bottom-start above system insets. The list scrolls and follows D-pad focus; overly
-wide rows scale their complete presentation uniformly rather than truncate labels.
-The Yapchik entry uses the upstream Settings hub's own themed `HubRow`, inserted
-directly after Appearance through a validated PSI anchor. It opens the existing
+Options is constrained to half the available width and three quarters of the height,
+anchored at the bottom-start above system insets. The list scrolls and follows D-pad
+focus. Icons and toggles keep their full size; a row is as tall as its tallest
+full-size part, and its labels take the largest text size whose lines, wrapped only
+at legal line breaks, fit that height. A long label therefore shrinks until a second
+line fits, then wraps. Labels are never truncated; only a row whose icons alone exceed
+the menu width scales uniformly.
+The Softkeys entry uses the upstream Settings hub's own themed `HubRow`, inserted
+directly after Appearance through a validated PSI anchor, with the hub's return-focus
+modifier, a section title, and settings-search entries. It opens the existing
 native Settings destination using the app's `SettingsScaffold`, `SettingsGroup`,
-and `SelectableRow`. Mode/profile changes and calibration use Yapchik's public
-APIs and persistence; a changed insertion anchor fails coverage validation.
+`SelectableRow`, and `GroupDivider`, with the same spacing as upstream pages.
+Mode/profile changes and calibration use Yapchik's public APIs and persistence; a
+changed insertion anchor, row-focus helper, or `SEARCH_INDEX` fails coverage validation.
+Page, softkey, and Options text lives in `res/values*/yapchik_strings.xml`, copied
+into the app beside upstream strings for every app language except Kurmanji, which
+falls back to English. The calibration dialog belongs to the pinned library and stays English.
+
+Vela's window theme is a framework theme, so Yapchik grows the bar by its nav guard to keep
+labels above an on-screen navigation bar. The Softkeys page's "Navigation bar space" setting
+(`runtime/NavBarSpace*.kt`, stored in `vela_settings`) drives the public `Yapchik.navGuardDp`: Off sets 0, On reserves
+the declared navigation bar height, and Automatic (the default) keeps Yapchik's estimate only
+when the phone has an on-screen navigation bar. On Android 11 and later that is the system's
+navigation bar size ignoring visibility; earlier, a declared bar on a phone that is not
+keypad-first. The choice is reapplied on every host composition.
+
+Backups and device transfers carry Yapchik's own `yapchik.xml` preferences (mode, key
+layout, calibrated keys) beside `vela_settings.xml`: the build adds it to every section of
+`backup_rules.xml` and `data_extraction_rules.xml` and stops if their anchors change.
+Calibrated keys belong to one phone; after restoring onto another model, recalibrate or
+pick a built-in layout.
 
 The bar reapplies the current Material theme to existing Yapchik views, because
 the pinned library reads bar colors only at construction. Options intercepts

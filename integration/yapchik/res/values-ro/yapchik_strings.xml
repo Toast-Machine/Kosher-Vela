@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">Taste de selecție</string>
+    <string name="yapchik_settings_sub">Bara și aranjamentul tastelor</string>
+    <string name="yapchik_settings_intro">Pe telefoanele cu taste, o bară din partea de jos a ecranului arată ce fac cele două taste de sub ecran. Tasta stângă deschide Opțiuni, o listă cu ce puteți face pe ecranul curent. Pe hartă, tasta dreaptă deschide căutarea.</string>
+    <string name="yapchik_softkey_bar">Bara tastelor de selecție</string>
+    <string name="yapchik_mode_on">Activat</string>
+    <string name="yapchik_mode_off">Dezactivat</string>
+    <string name="yapchik_mode_auto">Automat (activat pe telefoanele cu taste)</string>
+    <string name="yapchik_key_layout">Aranjamentul tastelor</string>
+    <string name="yapchik_profile_universal">Toate tastele de selecție cunoscute</string>
+    <string name="yapchik_profile_standard">Taste de selecție standard</string>
+    <string name="yapchik_profile_menu_back">Tastele Meniu și Înapoi</string>
+    <string name="yapchik_profile_function">Tastele F1 și F2</string>
+    <string name="yapchik_profile_custom">Personalizat (detectează tastele mele)</string>
+    <string name="yapchik_keys_hint">Tasta stângă: %1$s. Tasta dreaptă: %2$s.</string>
+    <string name="yapchik_options">Opțiuni</string>
+    <string name="yapchik_search">Căutare</string>
+    <string name="yapchik_no_actions">Nicio acțiune disponibilă</string>
+    <string name="yapchik_nav_space">Spațiu pentru bara de navigare</string>
+    <string name="yapchik_nav_space_auto">Automat (când există bară de navigare pe ecran)</string>
+    <string name="yapchik_nav_space_hint">Face bara tastelor mai înaltă, ca etichetele să rămână deasupra barei de navigare de pe ecran.</string>
+</resources>

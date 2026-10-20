@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">Klawisze programowe</string>
+    <string name="yapchik_settings_sub">Pasek i układ klawiszy</string>
+    <string name="yapchik_settings_intro">W telefonach z klawiaturą pasek na dole ekranu pokazuje, co robią dwa klawisze pod ekranem. Lewy klawisz otwiera Opcje, listę czynności dostępnych na bieżącym ekranie. Na mapie prawy klawisz otwiera wyszukiwanie.</string>
+    <string name="yapchik_softkey_bar">Pasek klawiszy programowych</string>
+    <string name="yapchik_mode_on">Włączone</string>
+    <string name="yapchik_mode_off">Wyłączone</string>
+    <string name="yapchik_mode_auto">Automatycznie (włączone w telefonach z klawiaturą)</string>
+    <string name="yapchik_key_layout">Układ klawiszy</string>
+    <string name="yapchik_profile_universal">Wszystkie znane klawisze programowe</string>
+    <string name="yapchik_profile_standard">Standardowe klawisze programowe</string>
+    <string name="yapchik_profile_menu_back">Klawisze Menu i Wstecz</string>
+    <string name="yapchik_profile_function">Klawisze F1 i F2</string>
+    <string name="yapchik_profile_custom">Własny (wykryj moje klawisze)</string>
+    <string name="yapchik_keys_hint">Lewy klawisz: %1$s. Prawy klawisz: %2$s.</string>
+    <string name="yapchik_options">Opcje</string>
+    <string name="yapchik_search">Szukaj</string>
+    <string name="yapchik_no_actions">Brak dostępnych czynności</string>
+    <string name="yapchik_nav_space">Miejsce na pasek nawigacji</string>
+    <string name="yapchik_nav_space_auto">Automatycznie (gdy na ekranie jest pasek nawigacji)</string>
+    <string name="yapchik_nav_space_hint">Zwiększa wysokość paska klawiszy, aby jego etykiety były nad ekranowym paskiem nawigacji.</string>
+</resources>

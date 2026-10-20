@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -8,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from kotlin_source import INTEGRATION, parse
-from yapchik import configure_diagnostics, edits_for_file, instrument, ui_composables, vendor_digest, verify_vendor
+from yapchik import configure_diagnostics, edits_for_file, include_yapchik_backup, instrument, ui_composables, vendor_digest, verify_vendor
 
 
 class InstrumentationTests(unittest.TestCase):
@@ -144,20 +145,39 @@ import androidx.compose.runtime.Composable
         source = '''package app.vela.ui.settings
 import androidx.compose.runtime.Composable
 @Composable fun SettingsHub() {
+    val sectionTitles = mapOf(
+        SettingsSection.APPEARANCE to stringResource(R.string.settings_appearance),
+        SettingsSection.MAP to stringResource(R.string.settings_map),
+    )
+    @Composable
+    fun rowModifier(section: SettingsSection, first: Boolean): Modifier {
+        return Modifier
+    }
     HubRow(title = stringResource(R.string.settings_appearance), onClick = {})
     HubRow(title = stringResource(R.string.settings_map), onClick = {})
 }
 @Composable private fun HubRow(title: String, onClick: () -> Unit) {}
+private val SEARCH_INDEX: List<Pair<Int, SettingsSection>> = listOf(
+    // Appearance
+    R.string.settings_theme_light to SettingsSection.APPEARANCE,
+    R.string.settings_units to SettingsSection.APPEARANCE,
+)
 '''
         path = Path(self.directory.name) / 'SettingsHub.kt'
         path.write_text(source, encoding='utf-8')
         report = instrument([path], Path(self.directory.name) / 'settings-placement.json')
         transformed = path.read_text(encoding='utf-8')
         self.assertEqual([], report['unsupported'])
-        self.assertLess(transformed.index('R.string.settings_appearance'), transformed.index('title = "Yapchik"'))
-        self.assertLess(transformed.index('title = "Yapchik"'), transformed.index('R.string.settings_map'))
-        self.assertIn('HubRow(icon = app.vela.ui.icons.SymOutlined.Settings', transformed)
+        row = transformed.index('HubRow(icon = YapchikDialpad')
+        self.assertLess(transformed.index('HubRow(title = stringResource(R.string.settings_appearance)'), row)
+        self.assertLess(row, transformed.index('HubRow(title = stringResource(R.string.settings_map)'))
+        self.assertIn('title = stringResource(R.string.yapchik_settings_title)', transformed)
+        self.assertIn('modifier = rowModifier(SettingsSection.YAPCHIK, first = false)', transformed)
         self.assertIn('onOpen(SettingsSection.YAPCHIK, null)', transformed)
+        self.assertIn('SettingsSection.YAPCHIK to stringResource(R.string.yapchik_settings_title),', transformed)
+        index = transformed[transformed.index('SEARCH_INDEX'):]
+        for key in ('yapchik_softkey_bar', 'yapchik_mode_auto', 'yapchik_nav_space', 'yapchik_key_layout', 'yapchik_profile_custom'):
+            self.assertIn(f'R.string.{key} to SettingsSection.YAPCHIK,', index)
         self.assertNotIn('YapchikPreferences()', transformed)
 
     def test_changed_settings_hub_fails_closed(self):
@@ -165,6 +185,40 @@ import androidx.compose.runtime.Composable
         path.write_text('package app.vela.ui.settings\nfun SettingsHub() {}', encoding='utf-8')
         with self.assertRaisesRegex(RuntimeError, 'requiring review'):
             instrument([path], Path(self.directory.name) / 'settings-changed.json')
+
+    def test_settings_hub_without_search_index_fails_closed(self):
+        source = '''package app.vela.ui.settings
+import androidx.compose.runtime.Composable
+@Composable fun SettingsHub() {
+    val sectionTitles = mapOf(SettingsSection.APPEARANCE to stringResource(R.string.settings_appearance),)
+    @Composable
+    fun rowModifier(section: SettingsSection, first: Boolean): Modifier = Modifier
+    HubRow(title = stringResource(R.string.settings_appearance), onClick = {})
+}
+@Composable private fun HubRow(title: String, onClick: () -> Unit) {}
+'''
+        path = Path(self.directory.name) / 'SettingsHub.kt'
+        path.write_text(source, encoding='utf-8')
+        with self.assertRaisesRegex(RuntimeError, 'requiring review'):
+            instrument([path], Path(self.directory.name) / 'settings-no-index.json')
+
+    def test_yapchik_strings_match_across_locales(self):
+        import xml.etree.ElementTree as ElementTree
+        files = sorted((INTEGRATION / 'res').glob('values*/yapchik_strings.xml'))
+        self.assertIn('values', [path.parent.name for path in files])
+        def strings(path):
+            return {node.get('name'): node.text for node in ElementTree.parse(path).getroot()}
+        english = strings(INTEGRATION / 'res/values/yapchik_strings.xml')
+        settings = (INTEGRATION / 'settings/YapchikSettings.kt').read_text(encoding='utf-8')
+        runtime = (INTEGRATION / 'runtime/YapchikRuntime.kt').read_text(encoding='utf-8')
+        for name in english:
+            self.assertTrue(f'R.string.{name}' in settings + runtime or name == 'yapchik_settings_sub', name)
+        for path in files:
+            translated = strings(path)
+            self.assertEqual(set(english), set(translated), path.parent.name)
+            for name, value in translated.items():
+                self.assertEqual(re.findall(r'%\d\$s', english[name]), re.findall(r'%\d\$s', value), (path.parent.name, name))
+                self.assertNotIn('—', value)
 
     def test_partial_sheet_does_not_hide_visible_map_controls(self):
         source = '''package fixture
@@ -192,11 +246,50 @@ import androidx.compose.runtime.Composable
 
     def test_options_dimensions_and_overflow_remain_bounded(self):
         source = (INTEGRATION / 'runtime/YapchikRuntime.kt').read_text(encoding='utf-8')
-        self.assertIn('.width(maxWidth / 2).heightIn(max = maxHeight / 2)', source)
+        self.assertIn('.width(maxWidth / 2).heightIn(max = maxHeight * 3 / 4)', source)
         self.assertIn('Modifier.weight(1f, fill = false)', source)
-        self.assertIn('for (visual in menuPresentation(reference.presentation))', source)
-        self.assertIn('maxLines = 1, softWrap = false', source)
-        self.assertIn('placeable.placeRelativeWithLayer', source)
+        self.assertIn('MenuEntry(menuPresentation(reference.presentation))', source)
+        self.assertNotIn('ScaleToMenuWidth', source)
+        menu_entry = source[source.index('private fun MenuEntry('):source.index('private fun applyBarTheme(')]
+        self.assertIn('subcompose(index) { fixed(visual) }.firstOrNull()?.let {\n                fixedParts[index] = it.measure(Constraints())', menu_entry)
+        self.assertIn('segments[i] * scale <= widths[i]', menu_entry)
+        self.assertIn('.size.height <= height', menu_entry)
+        self.assertIn('Text(label.second, style = textStyle)', menu_entry)
+        self.assertIn('menuContentScale(rowWidth, constraints.maxWidth)', menu_entry)
+        self.assertIn('part.placeRelativeWithLayer', menu_entry)
+
+    def test_options_scrolls_down_one_row_at_a_time(self):
+        source = (INTEGRATION / 'runtime/YapchikRuntime.kt').read_text(encoding='utf-8')
+        self.assertIn('index == rows.last().index + 1 ->', source)
+        self.assertIn('scroll.scrollBy((visible.offset + visible.size - layout.viewportEndOffset).toFloat())', source)
+        self.assertNotIn('scroll.scrollToItem(layout.visibleItemsInfo.first().index', source)
+
+    def test_yapchik_preferences_join_every_backup_section(self):
+        rules = Path(self.directory.name) / 'app/src/main/res/xml'
+        rules.mkdir(parents=True)
+        anchor = '        <include domain="sharedpref" path="vela_settings.xml" />'
+        (rules / 'backup_rules.xml').write_text(
+            '\n'.join(['<full-backup-content>', anchor, '</full-backup-content>', '']), encoding='utf-8')
+        (rules / 'data_extraction_rules.xml').write_text('\n'.join([
+            '<data-extraction-rules>', '<cloud-backup>', anchor, '</cloud-backup>',
+            '<device-transfer>', anchor, '</device-transfer>', '</data-extraction-rules>', '']), encoding='utf-8')
+        include_yapchik_backup(Path(self.directory.name))
+        include = '        <include domain="sharedpref" path="yapchik.xml" />'
+        self.assertEqual(1, (rules / 'backup_rules.xml').read_text(encoding='utf-8').count(include))
+        self.assertEqual(2, (rules / 'data_extraction_rules.xml').read_text(encoding='utf-8').count(include))
+        with self.assertRaisesRegex(RuntimeError, 'backup rules changed'):
+            include_yapchik_backup(Path(self.directory.name))
+
+    def test_navigation_bar_space_is_kept_in_backed_up_settings(self):
+        source = (INTEGRATION / 'runtime/NavBarSpaceSetting.kt').read_text(encoding='utf-8')
+        self.assertIn('private const val FILE = "vela_settings"', source)
+
+    def test_navigation_bar_space_setting_defaults_to_automatic_and_is_applied(self):
+        settings = (INTEGRATION / 'settings/YapchikSettings.kt').read_text(encoding='utf-8')
+        runtime = (INTEGRATION / 'runtime/YapchikRuntime.kt').read_text(encoding='utf-8')
+        self.assertIn('listOf(NavBarSpace.AUTO, NavBarSpace.OFF, NavBarSpace.ON)', settings)
+        self.assertIn('NavBarSpaceSetting.set(activity, choice)', settings)
+        self.assertIn('NavBarSpaceSetting.apply(activity)', runtime)
 
     def test_value_returning_composables_keep_their_values_in_both_repeat_forms(self):
         source, report = self.transformed("value_composables")
@@ -384,8 +477,8 @@ import androidx.compose.runtime.Composable
 
     def test_options_binding_opens_idempotently_for_aliased_key_events(self):
         source = (INTEGRATION / "runtime/YapchikRuntime.kt").read_text(encoding="utf-8")
-        self.assertIn('left("Options") { menuOpen = true }', source)
-        self.assertNotIn('left("Options") { menuOpen = !menuOpen }', source)
+        self.assertIn('left(optionsLabel) { menuOpen = true }', source)
+        self.assertNotIn('menuOpen = !menuOpen', source)
         self.assertIn("BackHandler(onBack = dismiss)", source)
 
     def test_key_diagnostics_are_opt_in_and_delegate_to_yapchik(self):

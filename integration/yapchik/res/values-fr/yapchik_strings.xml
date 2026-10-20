@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">Touches contextuelles</string>
+    <string name="yapchik_settings_sub">Barre et disposition des touches</string>
+    <string name="yapchik_settings_intro">Sur les téléphones à clavier, une barre en bas de l\'écran indique le rôle des deux touches situées sous l\'écran. La touche gauche ouvre Options, la liste des actions possibles sur l\'écran actuel. Sur la carte, la touche droite ouvre la recherche.</string>
+    <string name="yapchik_softkey_bar">Barre des touches contextuelles</string>
+    <string name="yapchik_mode_on">Activé</string>
+    <string name="yapchik_mode_off">Désactivé</string>
+    <string name="yapchik_mode_auto">Automatique (activé sur les téléphones à clavier)</string>
+    <string name="yapchik_key_layout">Disposition des touches</string>
+    <string name="yapchik_profile_universal">Toutes les touches contextuelles connues</string>
+    <string name="yapchik_profile_standard">Touches contextuelles standard</string>
+    <string name="yapchik_profile_menu_back">Touches Menu et Retour</string>
+    <string name="yapchik_profile_function">Touches F1 et F2</string>
+    <string name="yapchik_profile_custom">Personnalisé (détecter mes touches)</string>
+    <string name="yapchik_keys_hint">Touche gauche : %1$s. Touche droite : %2$s.</string>
+    <string name="yapchik_options">Options</string>
+    <string name="yapchik_search">Rechercher</string>
+    <string name="yapchik_no_actions">Aucune action disponible</string>
+    <string name="yapchik_nav_space">Espace pour la barre de navigation</string>
+    <string name="yapchik_nav_space_auto">Automatique (si une barre de navigation est affichée)</string>
+    <string name="yapchik_nav_space_hint">Agrandit la barre des touches pour que ses libellés restent au-dessus de la barre de navigation à l\'écran.</string>
+</resources>

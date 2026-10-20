@@ -8,6 +8,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,15 +28,20 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Placeable
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
@@ -51,6 +57,7 @@ import android.view.Window
 import android.widget.TextView
 import com.theonionsarewatching.yapchik.SoftkeyBar
 import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 private val LocalStore = staticCompositionLocalOf<ActionStore<ActionVisual>?> { null }
 private val LocalOwner = staticCompositionLocalOf<Any?> { null }
@@ -303,7 +310,10 @@ fun YapchikHost(content: @Composable () -> Unit) {
     }
     val currentRevision = revision
     val search = store.search()
+    val optionsLabel = stringResource(app.vela.R.string.yapchik_options)
+    val searchLabel = stringResource(app.vela.R.string.yapchik_search)
     SideEffect {
+        NavBarSpaceSetting.apply(activity)
         store.updateOwner(owner, ActionOwner(null, foreground, false, false))
         Yapchik.style.backgroundColor = theme.surface.toArgb()
         Yapchik.style.textColor = theme.onSurface.toArgb()
@@ -313,8 +323,8 @@ fun YapchikHost(content: @Composable () -> Unit) {
             noDefaults()
             screenMode = if (active && foreground && !store.suppressed) SoftkeyMode.ON else SoftkeyMode.OFF
             if (active && foreground && !store.suppressed) {
-                left("Options") { menuOpen = true }
-                if (search != null) right("Search") { store.dispatch(search.identity) { menuOpen = false } }
+                left(optionsLabel) { menuOpen = true }
+                if (search != null) right(searchLabel) { store.dispatch(search.identity) { menuOpen = false } }
             }
         }
         applyBarTheme(activity.window.decorView)
@@ -342,14 +352,28 @@ private fun OptionsMenu(store: ActionStore<ActionVisual>, handler: MutableState<
     }
     LaunchedEffect(focused, identities) {
         val index = identities.indexOf(focused)
-        if (index >= 0) {
-            previousIndex = index
+        if (index < 0) return@LaunchedEffect
+        previousIndex = index
+        // Reveal the focused row with the smallest scroll. The row just below the bottom edge is
+        // usually not laid out yet, because the row above it ends exactly at the edge: nudge it
+        // into the layout, then align its bottom, so DOWN scrolls one row at a time like UP.
+        repeat(3) {
             val layout = scroll.layoutInfo
-            val visible = layout.visibleItemsInfo.firstOrNull { it.index == index }
-            if (visible == null || visible.offset < layout.viewportStartOffset) scroll.scrollToItem(index)
-            else if (visible.offset + visible.size > layout.viewportEndOffset)
-                scroll.scrollToItem(layout.visibleItemsInfo.first().index,
-                    scroll.firstVisibleItemScrollOffset + visible.offset + visible.size - layout.viewportEndOffset)
+            val rows = layout.visibleItemsInfo
+            val visible = rows.firstOrNull { it.index == index }
+            when {
+                visible == null && rows.isNotEmpty() && index == rows.last().index + 1 ->
+                    scroll.scrollBy((rows.last().offset + rows.last().size - layout.viewportEndOffset + 1).coerceAtLeast(1).toFloat())
+                visible == null || visible.offset < layout.viewportStartOffset -> {
+                    scroll.scrollToItem(index)
+                    return@LaunchedEffect
+                }
+                visible.offset + visible.size > layout.viewportEndOffset -> {
+                    scroll.scrollBy((visible.offset + visible.size - layout.viewportEndOffset).toFloat())
+                    return@LaunchedEffect
+                }
+                else -> return@LaunchedEffect
+            }
         }
     }
     BackHandler(onBack = dismiss)
@@ -378,14 +402,14 @@ private fun OptionsMenu(store: ActionStore<ActionVisual>, handler: MutableState<
             interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = dismiss,
         ))
         Surface(
-            modifier = Modifier.align(Alignment.BottomStart).width(maxWidth / 2).heightIn(max = maxHeight / 2).then(menuKeys),
+            modifier = Modifier.align(Alignment.BottomStart).width(maxWidth / 2).heightIn(max = maxHeight * 3 / 4).then(menuKeys),
             shape = MaterialTheme.shapes.medium,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             shadowElevation = 6.dp,
         ) {
             Column(Modifier.padding(8.dp)) {
-                Text("Options", style = MaterialTheme.typography.titleMedium)
-                if (entries.isEmpty()) ScaleToMenuWidth { Text("No actions available", maxLines = 1, softWrap = false) }
+                Text(stringResource(app.vela.R.string.yapchik_options), style = MaterialTheme.typography.titleMedium)
+                if (entries.isEmpty()) MenuEntry(listOf(ActionVisual.Label(stringResource(app.vela.R.string.yapchik_no_actions)))) {}
                 LazyColumn(state = scroll, modifier = Modifier.weight(1f, fill = false)) {
                     items(entries, key = { store.lazyKey(it.identity) }) { reference ->
                         val highlighted = reference.identity == focused
@@ -398,20 +422,19 @@ private fun OptionsMenu(store: ActionStore<ActionVisual>, handler: MutableState<
                             contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (reference.enabled) 1f else 0.38f),
                         ) {
                             Box(Modifier.padding(10.dp)) {
-                                ScaleToMenuWidth {
-                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                        for (visual in menuPresentation(reference.presentation)) when (visual) {
-                                            is ActionVisual.Label -> Text(visual.text, maxLines = 1, softWrap = false)
-                                            is ActionVisual.Glyph -> when (val icon = visual.value) {
-                                                is ImageVector -> Icon(icon, visual.description)
-                                                is ImageBitmap -> Icon(icon, visual.description)
-                                                is Painter -> Icon(icon, visual.description)
-                                            }
-                                            is ActionVisual.Toggle -> when (visual.kind) {
-                                                "RadioButton" -> RadioButton(selected = reference.selected == true, onClick = null, enabled = reference.enabled)
-                                                "Switch" -> Switch(checked = reference.selected == true, onCheckedChange = null, enabled = reference.enabled)
-                                                else -> Checkbox(checked = reference.selected == true, onCheckedChange = null, enabled = reference.enabled)
-                                            }
+                                MenuEntry(menuPresentation(reference.presentation)) { visual ->
+                                    when (visual) {
+                                        is ActionVisual.Label -> Unit
+                                        is ActionVisual.Glyph -> when (val icon = visual.value) {
+                                            is ImageVector -> Icon(icon, visual.description)
+                                            is ImageBitmap -> Icon(icon, visual.description)
+                                            is Painter -> Icon(icon, visual.description)
+                                            else -> Unit
+                                        }
+                                        is ActionVisual.Toggle -> when (visual.kind) {
+                                            "RadioButton" -> RadioButton(selected = reference.selected == true, onClick = null, enabled = reference.enabled)
+                                            "Switch" -> Switch(checked = reference.selected == true, onCheckedChange = null, enabled = reference.enabled)
+                                            else -> Checkbox(checked = reference.selected == true, onCheckedChange = null, enabled = reference.enabled)
                                         }
                                     }
                                 }
@@ -424,18 +447,64 @@ private fun OptionsMenu(store: ActionStore<ActionVisual>, handler: MutableState<
     }
 }
 
+/**
+ * One Options row. Icons and toggles keep their full size; the labels share the remaining width.
+ * The row is as tall as its tallest full-size part (a one-line full-size label counts), and the
+ * labels take the largest common text scale whose word-wrapped lines fit that height: a label
+ * shrinks only until a second line fits, then wraps instead of shrinking further. Only when the
+ * full-size icons alone are wider than the menu does the whole row scale down uniformly.
+ */
 @Composable
-private fun ScaleToMenuWidth(content: @Composable () -> Unit) {
-    Layout(content = content) { measurables, constraints ->
-        val placeable = measurables.single().measure(constraints.copy(minWidth = 0, maxWidth = Constraints.Infinity, minHeight = 0))
-        val scale = menuContentScale(placeable.width, constraints.maxWidth)
-        val width = constraints.constrainWidth(ceil(placeable.width * scale).toInt())
-        val height = constraints.constrainHeight(ceil(placeable.height * scale).toInt())
-        layout(width, height) {
-            placeable.placeRelativeWithLayer(0, 0) {
-                scaleX = scale
-                scaleY = scale
-                transformOrigin = TransformOrigin(0f, 0f)
+private fun MenuEntry(visuals: List<ActionVisual>, fixed: @Composable (ActionVisual) -> Unit) {
+    val measurer = rememberTextMeasurer()
+    val base = LocalTextStyle.current.let { if (it.fontSize.isSpecified) it else it.copy(fontSize = 14.sp) }
+    SubcomposeLayout { constraints ->
+        val gap = 8.dp.roundToPx()
+        val fixedParts = HashMap<Int, Placeable>()
+        visuals.forEachIndexed { index, visual ->
+            if (visual !is ActionVisual.Label) subcompose(index) { fixed(visual) }.firstOrNull()?.let {
+                fixedParts[index] = it.measure(Constraints())
+            }
+        }
+        val labels = visuals.withIndex().mapNotNull { (index, visual) -> (visual as? ActionVisual.Label)?.let { index to it.text } }
+        val oneLine = labels.map { (_, text) -> measurer.measure(text, base, maxLines = 1, softWrap = false).size }
+        val segments = labels.map { (_, text) ->
+            unbreakableSegments(text).maxOfOrNull { measurer.measure(it, base, maxLines = 1, softWrap = false).size.width } ?: 0
+        }
+        val height = maxOf(fixedParts.values.maxOfOrNull { it.height } ?: 0, oneLine.maxOfOrNull { it.height } ?: 0)
+        val gaps = gap * (fixedParts.size + labels.size - 1).coerceAtLeast(0)
+        val available = if (constraints.hasBoundedWidth) constraints.maxWidth - fixedParts.values.sumOf { it.width } - gaps
+            else oneLine.sumOf { it.width }
+        val widths = labelWidths(oneLine.map { it.width }, available.coerceAtLeast(0))
+        fun style(scale: Float) = base.copy(
+            fontSize = base.fontSize * scale,
+            lineHeight = if (base.lineHeight.isSpecified) base.lineHeight * scale else base.lineHeight,
+        )
+        val scale = largestFittingScale { scale ->
+            val scaled = style(scale)
+            labels.indices.all { i ->
+                segments[i] * scale <= widths[i] &&
+                    measurer.measure(labels[i].second, scaled, constraints = Constraints(maxWidth = widths[i])).size.height <= height
+            }
+        }
+        val textStyle = style(scale)
+        val labelParts = labels.withIndex().associate { (i, label) ->
+            label.first to subcompose(label.first) { Text(label.second, style = textStyle) }.first()
+                .measure(Constraints(maxWidth = widths[i]))
+        }
+        val parts = visuals.indices.mapNotNull { fixedParts[it] ?: labelParts[it] }
+        val rowWidth = parts.sumOf { it.width } + gap * (parts.size - 1).coerceAtLeast(0)
+        val rowHeight = parts.maxOfOrNull { it.height } ?: 0
+        val shrink = if (constraints.hasBoundedWidth) menuContentScale(rowWidth, constraints.maxWidth) else 1f
+        layout(constraints.constrainWidth(ceil(rowWidth * shrink).toInt()), constraints.constrainHeight(ceil(rowHeight * shrink).toInt())) {
+            var x = 0
+            for (part in parts) {
+                part.placeRelativeWithLayer((x * shrink).roundToInt(), ((rowHeight - part.height) / 2 * shrink).roundToInt()) {
+                    scaleX = shrink
+                    scaleY = shrink
+                    transformOrigin = TransformOrigin(0f, 0f)
+                }
+                x += part.width + gap
             }
         }
     }

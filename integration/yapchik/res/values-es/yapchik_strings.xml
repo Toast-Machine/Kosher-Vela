@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">Teclas programables</string>
+    <string name="yapchik_settings_sub">Barra y distribución de teclas</string>
+    <string name="yapchik_settings_intro">En los teléfonos con teclado, una barra en la parte inferior de la pantalla muestra qué hacen las dos teclas que hay debajo de la pantalla. La tecla izquierda abre Opciones, una lista de lo que puedes hacer en la pantalla actual. En el mapa, la tecla derecha abre la búsqueda.</string>
+    <string name="yapchik_softkey_bar">Barra de teclas programables</string>
+    <string name="yapchik_mode_on">Activado</string>
+    <string name="yapchik_mode_off">Desactivado</string>
+    <string name="yapchik_mode_auto">Automático (activado en teléfonos con teclado)</string>
+    <string name="yapchik_key_layout">Distribución de teclas</string>
+    <string name="yapchik_profile_universal">Todas las teclas programables conocidas</string>
+    <string name="yapchik_profile_standard">Teclas programables estándar</string>
+    <string name="yapchik_profile_menu_back">Teclas Menú y Atrás</string>
+    <string name="yapchik_profile_function">Teclas F1 y F2</string>
+    <string name="yapchik_profile_custom">Personalizado (detectar mis teclas)</string>
+    <string name="yapchik_keys_hint">Tecla izquierda: %1$s. Tecla derecha: %2$s.</string>
+    <string name="yapchik_options">Opciones</string>
+    <string name="yapchik_search">Buscar</string>
+    <string name="yapchik_no_actions">No hay acciones disponibles</string>
+    <string name="yapchik_nav_space">Espacio para la barra de navegación</string>
+    <string name="yapchik_nav_space_auto">Automático (si hay barra de navegación en pantalla)</string>
+    <string name="yapchik_nav_space_hint">Hace más alta la barra de teclas para que sus etiquetas queden por encima de la barra de navegación en pantalla.</string>
+</resources>

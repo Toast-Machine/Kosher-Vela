@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">Seçim tuşları</string>
+    <string name="yapchik_settings_sub">Seçim tuşu çubuğu, tuş düzeni</string>
+    <string name="yapchik_settings_intro">Tuşlu telefonlarda ekranın altındaki bir çubuk, ekranın altındaki iki tuşun ne yaptığını gösterir. Sol tuş, geçerli ekranda yapabileceklerinizi listeleyen Seçenekler menüsünü açar. Haritada sağ tuş aramayı açar.</string>
+    <string name="yapchik_softkey_bar">Seçim tuşu çubuğu</string>
+    <string name="yapchik_mode_on">Açık</string>
+    <string name="yapchik_mode_off">Kapalı</string>
+    <string name="yapchik_mode_auto">Otomatik (tuşlu telefonlarda açık)</string>
+    <string name="yapchik_key_layout">Tuş düzeni</string>
+    <string name="yapchik_profile_universal">Bilinen tüm seçim tuşları</string>
+    <string name="yapchik_profile_standard">Standart seçim tuşları</string>
+    <string name="yapchik_profile_menu_back">Menü ve Geri tuşları</string>
+    <string name="yapchik_profile_function">F1 ve F2 tuşları</string>
+    <string name="yapchik_profile_custom">Özel (tuşlarımı algıla)</string>
+    <string name="yapchik_keys_hint">Sol tuş: %1$s. Sağ tuş: %2$s.</string>
+    <string name="yapchik_options">Seçenekler</string>
+    <string name="yapchik_search">Ara</string>
+    <string name="yapchik_no_actions">Kullanılabilir işlem yok</string>
+    <string name="yapchik_nav_space">Gezinme çubuğu boşluğu</string>
+    <string name="yapchik_nav_space_auto">Otomatik (ekranda gezinme çubuğu varsa)</string>
+    <string name="yapchik_nav_space_hint">Etiketlerin ekrandaki gezinme çubuğunun üstünde kalması için seçim tuşu çubuğunu yükseltir.</string>
+</resources>

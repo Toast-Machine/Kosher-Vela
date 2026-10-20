@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">מקשים רכים</string>
+    <string name="yapchik_settings_sub">סרגל מקשים רכים, פריסת מקשים</string>
+    <string name="yapchik_settings_intro">בטלפונים עם מקשים, סרגל בתחתית המסך מציג מה עושים שני המקשים שמתחת למסך. המקש השמאלי פותח את תפריט האפשרויות, רשימה של מה שאפשר לעשות במסך הנוכחי. במפה, המקש הימני פותח את החיפוש.</string>
+    <string name="yapchik_softkey_bar">סרגל מקשים רכים</string>
+    <string name="yapchik_mode_on">פועל</string>
+    <string name="yapchik_mode_off">כבוי</string>
+    <string name="yapchik_mode_auto">אוטומטי (פועל בטלפונים עם מקשים)</string>
+    <string name="yapchik_key_layout">פריסת מקשים</string>
+    <string name="yapchik_profile_universal">כל המקשים הרכים המוכרים</string>
+    <string name="yapchik_profile_standard">מקשים רכים רגילים</string>
+    <string name="yapchik_profile_menu_back">מקשי תפריט וחזרה</string>
+    <string name="yapchik_profile_function">מקשי F1 ו-F2</string>
+    <string name="yapchik_profile_custom">מותאם אישית (זיהוי המקשים שלי)</string>
+    <string name="yapchik_keys_hint">מקש שמאלי: %1$s. מקש ימני: %2$s.</string>
+    <string name="yapchik_options">אפשרויות</string>
+    <string name="yapchik_search">חיפוש</string>
+    <string name="yapchik_no_actions">אין פעולות זמינות</string>
+    <string name="yapchik_nav_space">מקום לסרגל הניווט</string>
+    <string name="yapchik_nav_space_auto">אוטומטי (כשיש סרגל ניווט על המסך)</string>
+    <string name="yapchik_nav_space_hint">מגביה את סרגל המקשים הרכים כדי שהתוויות שלו יישארו מעל סרגל הניווט שעל המסך.</string>
+</resources>

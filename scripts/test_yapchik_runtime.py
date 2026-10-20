@@ -45,6 +45,8 @@ def main():
             "-d", classes, str(INTEGRATION / "runtime/ActionStore.kt"),
             str(INTEGRATION / "runtime/MenuPresentation.kt"),
             str(INTEGRATION / "runtime/MenuKeyGestures.kt"),
+            str(INTEGRATION / "runtime/NavBarSpace.kt"),
+            str(INTEGRATION / "tests/NavBarSpaceTest.kt"),
             str(INTEGRATION / "tests/ActionStoreTest.kt"),
             str(INTEGRATION / "tests/MenuPresentationTest.kt"),
             str(INTEGRATION / "tests/MenuKeyGesturesTest.kt"),
@@ -54,7 +56,7 @@ def main():
         subprocess.run([
             "java", "-cp", classes + os.pathsep + classpath,
             "org.junit.runner.JUnitCore", "app.vela.yapchik.ActionStoreTest", "app.vela.yapchik.MenuPresentationTest",
-            "app.vela.yapchik.MenuKeyGesturesTest",
+            "app.vela.yapchik.MenuKeyGesturesTest", "app.vela.yapchik.NavBarSpaceTest",
         ], check=True)
 
 

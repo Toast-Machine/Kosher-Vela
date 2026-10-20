@@ -27,6 +27,50 @@ class MenuPresentationTest {
         }
     }
 
+    @Test fun wrappingBreaksAtWordsAndBetweenIdeographs() {
+        assertEquals(listOf("Save", "parking", "spot"), unbreakableSegments("Save parking  spot", java.util.Locale.ENGLISH))
+        assertEquals(listOf("F1/F2"), unbreakableSegments("F1/F2", java.util.Locale.ENGLISH))
+        assertTrue(unbreakableSegments("   ").isEmpty())
+        assertEquals(4, unbreakableSegments("保存位置", java.util.Locale.CHINESE).size)
+    }
+
+    @Test fun labelsKeepNaturalWidthsUntilTheyMustShareTheRow() {
+        assertEquals(listOf(40, 60), labelWidths(listOf(40, 60), 120))
+        assertEquals(listOf(20, 30), labelWidths(listOf(40, 60), 50))
+        assertEquals(listOf(0, 0), labelWidths(listOf(40, 60), 0))
+        assertEquals(listOf(0), labelWidths(listOf(0), -5))
+        assertTrue(labelWidths(emptyList(), 100).isEmpty())
+    }
+
+    @Test fun textStaysFullSizeWhenItFits() {
+        var calls = 0
+        assertEquals(1f, largestFittingScale { calls++; true }, 0f)
+        assertEquals(1, calls)
+    }
+
+    @Test fun textShrinksOnlyToTheLargestScaleThatFits() {
+        val fitted = largestFittingScale { it <= 0.62f }
+        assertTrue(fitted <= 0.62f)
+        assertTrue(fitted > 0.6f)
+    }
+
+    @Test fun wrappingRecoversSizeOnceASecondLineFits() {
+        // A 300px label in a row one 24px line tall. In a 200px column one line at scale 2/3 beats
+        // two lines (at most 1/2). In a 60px column one line needs scale 1/5, but two lines fit
+        // at 2/5, so the label wraps and stays twice as large.
+        fun lines(scale: Float, width: Int) = kotlin.math.ceil(300 * scale / width - 0.0001f).toInt()
+        val wide = largestFittingScale { scale -> lines(scale, 200) * 24 * scale <= 24 }
+        assertEquals(2f / 3, wide, 0.01f)
+        assertEquals(1, lines(wide, 200))
+        val narrow = largestFittingScale { scale -> lines(scale, 60) * 24 * scale <= 24 }
+        assertEquals(0.4f, narrow, 0.01f)
+        assertEquals(2, lines(narrow, 60))
+    }
+
+    @Test fun nothingFittingFallsBackToTheMinimumScale() {
+        assertEquals(0.05f, largestFittingScale { false }, 0f)
+    }
+
     @Test fun iconDescriptionsBecomeVisibleAccessibleLabels() {
         val icon = Any()
         assertEquals(listOf(ActionVisual.Glyph(icon, null), ActionVisual.Label("Save parking")),

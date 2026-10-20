@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">Valikuklahvid</string>
+    <string name="yapchik_settings_sub">Valikuklahvide riba, klahvipaigutus</string>
+    <string name="yapchik_settings_intro">Klahvistikuga telefonidel näitab ekraani allservas olev riba, mida teevad kaks ekraani all olevat klahvi. Vasak klahv avab menüü Valikud, mis loetleb praegusel ekraanil saadaolevad toimingud. Kaardil avab parem klahv otsingu.</string>
+    <string name="yapchik_softkey_bar">Valikuklahvide riba</string>
+    <string name="yapchik_mode_on">Sees</string>
+    <string name="yapchik_mode_off">Väljas</string>
+    <string name="yapchik_mode_auto">Automaatne (sees klahvistikuga telefonidel)</string>
+    <string name="yapchik_key_layout">Klahvipaigutus</string>
+    <string name="yapchik_profile_universal">Kõik teadaolevad valikuklahvid</string>
+    <string name="yapchik_profile_standard">Tavalised valikuklahvid</string>
+    <string name="yapchik_profile_menu_back">Menüü- ja Tagasi-klahv</string>
+    <string name="yapchik_profile_function">F1- ja F2-klahv</string>
+    <string name="yapchik_profile_custom">Kohandatud (tuvasta minu klahvid)</string>
+    <string name="yapchik_keys_hint">Vasak klahv: %1$s. Parem klahv: %2$s.</string>
+    <string name="yapchik_options">Valikud</string>
+    <string name="yapchik_search">Otsing</string>
+    <string name="yapchik_no_actions">Toiminguid pole saadaval</string>
+    <string name="yapchik_nav_space">Navigeerimisriba ruum</string>
+    <string name="yapchik_nav_space_auto">Automaatne (kui ekraanil on navigeerimisriba)</string>
+    <string name="yapchik_nav_space_hint">Teeb valikuklahvide riba kõrgemaks, et selle sildid jääksid ekraanil oleva navigeerimisriba kohale.</string>
+</resources>

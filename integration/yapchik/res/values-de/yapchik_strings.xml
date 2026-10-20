@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">Softkeys</string>
+    <string name="yapchik_settings_sub">Softkey-Leiste, Tastenbelegung</string>
+    <string name="yapchik_settings_intro">Auf Tastenhandys zeigt eine Leiste unten am Bildschirm, was die beiden Tasten unter dem Bildschirm tun. Die linke Taste öffnet Optionen, eine Liste der Aktionen auf dem aktuellen Bildschirm. Auf der Karte öffnet die rechte Taste die Suche.</string>
+    <string name="yapchik_softkey_bar">Softkey-Leiste</string>
+    <string name="yapchik_mode_on">An</string>
+    <string name="yapchik_mode_off">Aus</string>
+    <string name="yapchik_mode_auto">Automatisch (an auf Tastenhandys)</string>
+    <string name="yapchik_key_layout">Tastenbelegung</string>
+    <string name="yapchik_profile_universal">Alle bekannten Softkeys</string>
+    <string name="yapchik_profile_standard">Standard-Softkeys</string>
+    <string name="yapchik_profile_menu_back">Menü- und Zurück-Taste</string>
+    <string name="yapchik_profile_function">F1- und F2-Taste</string>
+    <string name="yapchik_profile_custom">Benutzerdefiniert (meine Tasten erkennen)</string>
+    <string name="yapchik_keys_hint">Linke Taste: %1$s. Rechte Taste: %2$s.</string>
+    <string name="yapchik_options">Optionen</string>
+    <string name="yapchik_search">Suche</string>
+    <string name="yapchik_no_actions">Keine Aktionen verfügbar</string>
+    <string name="yapchik_nav_space">Platz für Navigationsleiste</string>
+    <string name="yapchik_nav_space_auto">Automatisch (bei Navigationsleiste auf dem Bildschirm)</string>
+    <string name="yapchik_nav_space_hint">Macht die Softkey-Leiste höher, damit ihre Beschriftungen über der Navigationsleiste auf dem Bildschirm bleiben.</string>
+</resources>

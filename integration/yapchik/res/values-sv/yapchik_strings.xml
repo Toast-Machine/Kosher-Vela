@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">Valknappar</string>
+    <string name="yapchik_settings_sub">Valknappsfält, knapplayout</string>
+    <string name="yapchik_settings_intro">På knapptelefoner visar ett fält längst ned på skärmen vad de två knapparna under skärmen gör. Vänster knapp öppnar Alternativ, en lista över vad du kan göra på den aktuella skärmen. På kartan öppnar höger knapp sökningen.</string>
+    <string name="yapchik_softkey_bar">Valknappsfält</string>
+    <string name="yapchik_mode_on">På</string>
+    <string name="yapchik_mode_off">Av</string>
+    <string name="yapchik_mode_auto">Automatiskt (på för knapptelefoner)</string>
+    <string name="yapchik_key_layout">Knapplayout</string>
+    <string name="yapchik_profile_universal">Alla kända valknappar</string>
+    <string name="yapchik_profile_standard">Vanliga valknappar</string>
+    <string name="yapchik_profile_menu_back">Meny- och Bakåt-knapp</string>
+    <string name="yapchik_profile_function">F1- och F2-knapp</string>
+    <string name="yapchik_profile_custom">Anpassad (identifiera mina knappar)</string>
+    <string name="yapchik_keys_hint">Vänster knapp: %1$s. Höger knapp: %2$s.</string>
+    <string name="yapchik_options">Alternativ</string>
+    <string name="yapchik_search">Sök</string>
+    <string name="yapchik_no_actions">Inga åtgärder tillgängliga</string>
+    <string name="yapchik_nav_space">Utrymme för navigeringsfält</string>
+    <string name="yapchik_nav_space_auto">Automatiskt (när det finns ett navigeringsfält på skärmen)</string>
+    <string name="yapchik_nav_space_hint">Gör valknappsfältet högre så att etiketterna hamnar ovanför navigeringsfältet på skärmen.</string>
+</resources>

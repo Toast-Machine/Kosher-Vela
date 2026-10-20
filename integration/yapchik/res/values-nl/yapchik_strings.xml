@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">Softkeys</string>
+    <string name="yapchik_settings_sub">Softkeybalk, toetsindeling</string>
+    <string name="yapchik_settings_intro">Op telefoons met toetsen toont een balk onder in het scherm wat de twee toetsen onder het scherm doen. De linkertoets opent Opties, een lijst van wat je op het huidige scherm kunt doen. Op de kaart opent de rechtertoets het zoeken.</string>
+    <string name="yapchik_softkey_bar">Softkeybalk</string>
+    <string name="yapchik_mode_on">Aan</string>
+    <string name="yapchik_mode_off">Uit</string>
+    <string name="yapchik_mode_auto">Automatisch (aan op telefoons met toetsen)</string>
+    <string name="yapchik_key_layout">Toetsindeling</string>
+    <string name="yapchik_profile_universal">Alle bekende softkeys</string>
+    <string name="yapchik_profile_standard">Standaard-softkeys</string>
+    <string name="yapchik_profile_menu_back">Menu- en Terug-toets</string>
+    <string name="yapchik_profile_function">F1- en F2-toets</string>
+    <string name="yapchik_profile_custom">Aangepast (mijn toetsen detecteren)</string>
+    <string name="yapchik_keys_hint">Linkertoets: %1$s. Rechtertoets: %2$s.</string>
+    <string name="yapchik_options">Opties</string>
+    <string name="yapchik_search">Zoeken</string>
+    <string name="yapchik_no_actions">Geen acties beschikbaar</string>
+    <string name="yapchik_nav_space">Ruimte voor navigatiebalk</string>
+    <string name="yapchik_nav_space_auto">Automatisch (als er een navigatiebalk op het scherm is)</string>
+    <string name="yapchik_nav_space_hint">Maakt de softkeybalk hoger zodat de labels boven de navigatiebalk op het scherm blijven.</string>
+</resources>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">Softkeys</string>
+    <string name="yapchik_settings_sub">Softkey bar, key layout</string>
+    <string name="yapchik_settings_intro">On keypad phones, a bar at the bottom of the screen labels the two keys below the screen. The left key opens Options, a list of what you can do on the current screen. On the map, the right key opens search.</string>
+    <string name="yapchik_softkey_bar">Softkey bar</string>
+    <string name="yapchik_mode_on">On</string>
+    <string name="yapchik_mode_off">Off</string>
+    <string name="yapchik_mode_auto">Automatic (on for keypad phones)</string>
+    <string name="yapchik_key_layout">Key layout</string>
+    <string name="yapchik_profile_universal">All known softkeys</string>
+    <string name="yapchik_profile_standard">Standard softkeys</string>
+    <string name="yapchik_profile_menu_back">Menu and Back keys</string>
+    <string name="yapchik_profile_function">F1 and F2 keys</string>
+    <string name="yapchik_profile_custom">Custom (detect my keys)</string>
+    <string name="yapchik_keys_hint">Left key: %1$s. Right key: %2$s.</string>
+    <string name="yapchik_options">Options</string>
+    <string name="yapchik_search">Search</string>
+    <string name="yapchik_no_actions">No actions available</string>
+    <string name="yapchik_nav_space">Navigation bar space</string>
+    <string name="yapchik_nav_space_auto">Automatic (when there is an on-screen navigation bar)</string>
+    <string name="yapchik_nav_space_hint">Makes the softkey bar taller so its labels stay above the phone\'s on-screen navigation bar.</string>
+</resources>

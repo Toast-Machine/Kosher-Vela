@@ -26,6 +26,13 @@ WINDOWS = {"Dialog", "Popup", "ModalBottomSheet", "DropdownMenu", "BasicAlertDia
 PRESENTATION = {"Text", "Icon", "BasicTextField", "TextField", "OutlinedTextField"}
 REPEATS = {"items", "itemsIndexed", "forEach", "forEachIndexed"}
 UNSUPPORTED = {"triStateToggleable", "TriStateCheckbox"}
+HUB_ROW_FOCUS = b"fun rowModifier(section: SettingsSection, first: Boolean): Modifier"
+HUB_TITLE_ANCHOR = b"SettingsSection.APPEARANCE to stringResource(R.string.settings_appearance),"
+BACKUP_ANCHOR = '<include domain="sharedpref" path="vela_settings.xml" />'
+BACKUP_INCLUDE = '<include domain="sharedpref" path="yapchik.xml" />'
+# Vela backs up an explicit file list; Yapchik's own preferences join it in every section.
+BACKUP_RULES = {"backup_rules.xml": 1, "data_extraction_rules.xml": 2}
+SEARCH_KEYS = ("yapchik_softkey_bar", "yapchik_mode_auto", "yapchik_nav_space", "yapchik_key_layout", "yapchik_profile_custom")
 MODIFIER_POSITIONS = {name: 1 for name in BUTTONS}
 MODIFIER_POSITIONS.update({name: 2 for name in TOGGLES | {"RadioButton", "DropdownMenuItem", "AssistChip", "ElevatedAssistChip", "SuggestionChip", "ElevatedSuggestionChip"}})
 MODIFIER_POSITIONS.update({"FilterChip": 3, "InputChip": 3})
@@ -319,14 +326,22 @@ def edits_for_file(file, composables=None):
         appearance = [call for call in calls if call["callee"] == "HubRow"
                       and "R.string.settings_appearance" in text(source, argument(call, "title"))]
         rows = [function for function in file["functions"] if function["name"] == "HubRow" and function["composable"]]
-        if len(appearance) != 1 or len(rows) != 1:
+        index = list(re.finditer(rb"(?m)^private val SEARCH_INDEX: List<Pair<Int, SettingsSection>> = listOf\(\n"
+                                 rb"(?:[ \t]+[^\n]*,[ \t]*(?://[^\n]*)?\n|[ \t]+//[^\n]*\n|\n)*^\)", source))
+        if (len(appearance) != 1 or len(rows) != 1 or len(index) != 1
+                or source.count(HUB_ROW_FOCUS) != 1 or source.count(HUB_TITLE_ANCHOR) != 1):
             report["unsupported"].append({"file": path.name, "reason": "Softkey settings insertion point changed"})
         else:
             point = appearance[0]["full"][1]
             insert([point, point], '\n'
-                   'HubRow(icon = app.vela.ui.icons.SymOutlined.Settings, title = "Yapchik", '
-                   'subtitle = "Hardware softkeys and key calibration", '
+                   'HubRow(icon = YapchikDialpad, title = stringResource(R.string.yapchik_settings_title), '
+                   'subtitle = stringResource(R.string.yapchik_settings_sub), '
+                   'modifier = rowModifier(SettingsSection.YAPCHIK, first = false), '
                    'onClick = { onOpen(SettingsSection.YAPCHIK, null) })\n')
+            point = source.index(HUB_TITLE_ANCHOR) + len(HUB_TITLE_ANCHOR)
+            insert([point, point], "\nSettingsSection.YAPCHIK to stringResource(R.string.yapchik_settings_title),")
+            point = index[0].end() - 1
+            insert([point, point], "".join(f"    R.string.{key} to SettingsSection.YAPCHIK,\n" for key in SEARCH_KEYS))
     if path.name == "SettingsRoutes.kt":
         anchor = "HUB, APPEARANCE,"
         if source.decode().count(anchor) != 1:
@@ -392,6 +407,13 @@ def integrate(root):
         raise RuntimeError("Yapchik instrumentation must run once on a fresh checkout")
     shutil.copyfile(INTEGRATION / "settings/YapchikSettings.kt",
                     root / "app/src/main/java/app/vela/ui/settings/YapchikSettings.kt")
+    for strings in sorted((INTEGRATION / "res").glob("values*/yapchik_strings.xml")):
+        target = root / "app/src/main/res" / strings.parent.name / strings.name
+        if target.exists():
+            raise RuntimeError("Upstream already has " + str(target.relative_to(root)))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(strings, target)
+    include_yapchik_backup(root)
     paths = list((root / "app/src/main/java/app/vela/ui").rglob("*.kt"))
     paths.append(root / "app/src/main/java/app/vela/MainActivity.kt")
     report = instrument(paths, root / "yapchik-coverage.json")
@@ -421,7 +443,21 @@ def integrate(root):
     return report
 
 
+def include_yapchik_backup(root):
+    for name, sections in BACKUP_RULES.items():
+        path = root / "app/src/main/res/xml" / name
+        source = path.read_text(encoding="utf-8")
+        if source.count(BACKUP_ANCHOR) != sections or BACKUP_INCLUDE in source:
+            raise RuntimeError(f"Upstream backup rules changed; review Yapchik backup in {name}")
+        source = re.sub(r"(?m)^([ \t]*)" + re.escape(BACKUP_ANCHOR) + r"\r?\n",
+                        lambda match: match[0] + match[1] + BACKUP_INCLUDE + "\n", source)
+        path.write_text(source, encoding="utf-8")
+
+
 def verify_integration(root):
+    for name, sections in BACKUP_RULES.items():
+        if (root / "app/src/main/res/xml" / name).read_text(encoding="utf-8").count(BACKUP_INCLUDE) != sections:
+            raise RuntimeError("Yapchik preferences are missing from " + name)
     report = json.loads((root / "yapchik-coverage.json").read_text())
     if report["unsupported"] or not report["instrumented"] or report["yapchik_revision"] != PIN:
         raise RuntimeError("Yapchik coverage or pinned revision is invalid")

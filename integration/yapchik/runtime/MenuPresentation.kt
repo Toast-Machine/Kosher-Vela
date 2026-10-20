@@ -1,5 +1,8 @@
 package app.vela.yapchik
 
+import java.text.BreakIterator
+import java.util.Locale
+
 sealed interface ActionVisual {
     data class Label(val text: String) : ActionVisual
     data class Glyph(val value: Any, val description: String?) : ActionVisual
@@ -22,3 +25,39 @@ internal fun menuPresentation(presentation: List<ActionVisual>): List<ActionVisu
 
 internal fun menuContentScale(contentWidth: Int, availableWidth: Int): Float =
     if (contentWidth <= 0) 1f else (availableWidth.toFloat() / contentWidth).coerceIn(0f, 1f)
+
+/** Splits [text] at its legal line breaks (spaces, and between CJK characters). A wrapped label
+ *  must fit its widest segment on one line, so wrapping never cuts through a word. */
+internal fun unbreakableSegments(text: String, locale: Locale = Locale.getDefault()): List<String> {
+    val breaks = BreakIterator.getLineInstance(locale).apply { setText(text) }
+    val segments = mutableListOf<String>()
+    var start = breaks.first()
+    var end = breaks.next()
+    while (end != BreakIterator.DONE) {
+        text.substring(start, end).trim().takeIf { it.isNotEmpty() }?.let(segments::add)
+        start = end
+        end = breaks.next()
+    }
+    return segments
+}
+
+/** Shares [available] text width among a row's labels: their one-line widths when they all fit,
+ *  otherwise in proportion to those widths. */
+internal fun labelWidths(natural: List<Int>, available: Int): List<Int> {
+    val total = natural.sumOf { it.toLong() }
+    if (total <= available) return natural
+    return natural.map { if (total <= 0) 0 else (it.toLong() * available.coerceAtLeast(0) / total).toInt() }
+}
+
+/** The largest text scale in [minScale]..1 that [fits], by bisection. Larger text never needs
+ *  fewer lines, so the fitting scales form one interval starting at [minScale]. */
+internal fun largestFittingScale(minScale: Float = 0.05f, steps: Int = 12, fits: (Float) -> Boolean): Float {
+    if (fits(1f)) return 1f
+    var low = minScale
+    var high = 1f
+    repeat(steps) {
+        val middle = (low + high) / 2
+        if (fits(middle)) low = middle else high = middle
+    }
+    return low
+}

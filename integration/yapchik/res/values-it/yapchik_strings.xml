@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">Tasti di selezione</string>
+    <string name="yapchik_settings_sub">Barra e layout dei tasti</string>
+    <string name="yapchik_settings_intro">Sui telefoni con tastiera, una barra in fondo allo schermo indica la funzione dei due tasti sotto lo schermo. Il tasto sinistro apre Opzioni, l\'elenco delle azioni disponibili nella schermata corrente. Sulla mappa, il tasto destro apre la ricerca.</string>
+    <string name="yapchik_softkey_bar">Barra dei tasti di selezione</string>
+    <string name="yapchik_mode_on">Attivo</string>
+    <string name="yapchik_mode_off">Disattivo</string>
+    <string name="yapchik_mode_auto">Automatico (attivo sui telefoni con tastiera)</string>
+    <string name="yapchik_key_layout">Layout dei tasti</string>
+    <string name="yapchik_profile_universal">Tutti i tasti di selezione noti</string>
+    <string name="yapchik_profile_standard">Tasti di selezione standard</string>
+    <string name="yapchik_profile_menu_back">Tasti Menu e Indietro</string>
+    <string name="yapchik_profile_function">Tasti F1 e F2</string>
+    <string name="yapchik_profile_custom">Personalizzato (rileva i miei tasti)</string>
+    <string name="yapchik_keys_hint">Tasto sinistro: %1$s. Tasto destro: %2$s.</string>
+    <string name="yapchik_options">Opzioni</string>
+    <string name="yapchik_search">Cerca</string>
+    <string name="yapchik_no_actions">Nessuna azione disponibile</string>
+    <string name="yapchik_nav_space">Spazio per la barra di navigazione</string>
+    <string name="yapchik_nav_space_auto">Automatico (se c\'è una barra di navigazione sullo schermo)</string>
+    <string name="yapchik_nav_space_hint">Rende più alta la barra dei tasti perché le etichette restino sopra la barra di navigazione sullo schermo.</string>
+</resources>

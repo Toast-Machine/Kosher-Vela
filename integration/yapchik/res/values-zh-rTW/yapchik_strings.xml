@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">軟鍵</string>
+    <string name="yapchik_settings_sub">軟鍵列、按鍵配置</string>
+    <string name="yapchik_settings_intro">在按鍵手機上，螢幕底部的軟鍵列會顯示螢幕下方兩個按鍵的功能。左鍵開啟「選項」，列出目前畫面上可執行的操作。在地圖上，右鍵開啟搜尋。</string>
+    <string name="yapchik_softkey_bar">軟鍵列</string>
+    <string name="yapchik_mode_on">開啟</string>
+    <string name="yapchik_mode_off">關閉</string>
+    <string name="yapchik_mode_auto">自動（在按鍵手機上開啟）</string>
+    <string name="yapchik_key_layout">按鍵配置</string>
+    <string name="yapchik_profile_universal">所有已知軟鍵</string>
+    <string name="yapchik_profile_standard">標準軟鍵</string>
+    <string name="yapchik_profile_menu_back">選單鍵和返回鍵</string>
+    <string name="yapchik_profile_function">F1 和 F2 鍵</string>
+    <string name="yapchik_profile_custom">自訂（偵測我的按鍵）</string>
+    <string name="yapchik_keys_hint">左鍵：%1$s。右鍵：%2$s。</string>
+    <string name="yapchik_options">選項</string>
+    <string name="yapchik_search">搜尋</string>
+    <string name="yapchik_no_actions">沒有可用的操作</string>
+    <string name="yapchik_nav_space">導覽列空間</string>
+    <string name="yapchik_nav_space_auto">自動（螢幕上有導覽列時）</string>
+    <string name="yapchik_nav_space_hint">加高軟鍵列，讓標籤保持在螢幕導覽列上方。</string>
+</resources>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">Софт-клавиши</string>
+    <string name="yapchik_settings_sub">Панель софт-клавиш, раскладка клавиш</string>
+    <string name="yapchik_settings_intro">На кнопочных телефонах панель внизу экрана показывает, что делают две клавиши под экраном. Левая клавиша открывает меню «Опции» со списком действий на текущем экране. На карте правая клавиша открывает поиск.</string>
+    <string name="yapchik_softkey_bar">Панель софт-клавиш</string>
+    <string name="yapchik_mode_on">Вкл.</string>
+    <string name="yapchik_mode_off">Выкл.</string>
+    <string name="yapchik_mode_auto">Автоматически (вкл. на кнопочных телефонах)</string>
+    <string name="yapchik_key_layout">Раскладка клавиш</string>
+    <string name="yapchik_profile_universal">Все известные софт-клавиши</string>
+    <string name="yapchik_profile_standard">Стандартные софт-клавиши</string>
+    <string name="yapchik_profile_menu_back">Клавиши «Меню» и «Назад»</string>
+    <string name="yapchik_profile_function">Клавиши F1 и F2</string>
+    <string name="yapchik_profile_custom">Своя (определить мои клавиши)</string>
+    <string name="yapchik_keys_hint">Левая клавиша: %1$s. Правая клавиша: %2$s.</string>
+    <string name="yapchik_options">Опции</string>
+    <string name="yapchik_search">Поиск</string>
+    <string name="yapchik_no_actions">Нет доступных действий</string>
+    <string name="yapchik_nav_space">Место для панели навигации</string>
+    <string name="yapchik_nav_space_auto">Автоматически (если на экране есть панель навигации)</string>
+    <string name="yapchik_nav_space_hint">Делает панель софт-клавиш выше, чтобы подписи оставались над экранной панелью навигации.</string>
+</resources>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">ソフトキー</string>
+    <string name="yapchik_settings_sub">ソフトキーバー、キー配置</string>
+    <string name="yapchik_settings_intro">キー付き携帯電話では、画面下部のバーに画面下の2つのキーの機能が表示されます。左キーで「オプション」が開き、現在の画面でできる操作が一覧表示されます。地図では、右キーで検索が開きます。</string>
+    <string name="yapchik_softkey_bar">ソフトキーバー</string>
+    <string name="yapchik_mode_on">オン</string>
+    <string name="yapchik_mode_off">オフ</string>
+    <string name="yapchik_mode_auto">自動（キー付き携帯電話でオン）</string>
+    <string name="yapchik_key_layout">キー配置</string>
+    <string name="yapchik_profile_universal">既知のすべてのソフトキー</string>
+    <string name="yapchik_profile_standard">標準のソフトキー</string>
+    <string name="yapchik_profile_menu_back">メニューキーと戻るキー</string>
+    <string name="yapchik_profile_function">F1キーとF2キー</string>
+    <string name="yapchik_profile_custom">カスタム（自分のキーを検出）</string>
+    <string name="yapchik_keys_hint">左キー: %1$s。右キー: %2$s。</string>
+    <string name="yapchik_options">オプション</string>
+    <string name="yapchik_search">検索</string>
+    <string name="yapchik_no_actions">利用できる操作はありません</string>
+    <string name="yapchik_nav_space">ナビゲーションバーの余白</string>
+    <string name="yapchik_nav_space_auto">自動（画面上にナビゲーションバーがある場合）</string>
+    <string name="yapchik_nav_space_hint">ラベルが画面上のナビゲーションバーに隠れないよう、ソフトキーバーを高くします。</string>
+</resources>

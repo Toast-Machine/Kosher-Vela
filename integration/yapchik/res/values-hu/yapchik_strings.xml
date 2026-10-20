@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yapchik_settings_title">Választógombok</string>
+    <string name="yapchik_settings_sub">Választógomb-sáv, gombkiosztás</string>
+    <string name="yapchik_settings_intro">Billentyűzetes telefonokon a képernyő alján egy sáv mutatja, mit csinál a képernyő alatti két gomb. A bal gomb megnyitja az Opciók menüt, amely az aktuális képernyőn elérhető műveleteket sorolja fel. A térképen a jobb gomb a keresést nyitja meg.</string>
+    <string name="yapchik_softkey_bar">Választógomb-sáv</string>
+    <string name="yapchik_mode_on">Be</string>
+    <string name="yapchik_mode_off">Ki</string>
+    <string name="yapchik_mode_auto">Automatikus (billentyűzetes telefonokon be)</string>
+    <string name="yapchik_key_layout">Gombkiosztás</string>
+    <string name="yapchik_profile_universal">Minden ismert választógomb</string>
+    <string name="yapchik_profile_standard">Szabványos választógombok</string>
+    <string name="yapchik_profile_menu_back">Menü és Vissza gomb</string>
+    <string name="yapchik_profile_function">F1 és F2 gomb</string>
+    <string name="yapchik_profile_custom">Egyéni (gombjaim felismerése)</string>
+    <string name="yapchik_keys_hint">Bal gomb: %1$s. Jobb gomb: %2$s.</string>
+    <string name="yapchik_options">Opciók</string>
+    <string name="yapchik_search">Keresés</string>
+    <string name="yapchik_no_actions">Nincs elérhető művelet</string>
+    <string name="yapchik_nav_space">Hely a navigációs sávnak</string>
+    <string name="yapchik_nav_space_auto">Automatikus (ha van navigációs sáv a képernyőn)</string>
+    <string name="yapchik_nav_space_hint">Magasabbá teszi a választógomb-sávot, hogy a feliratai a képernyőn lévő navigációs sáv fölött maradjanak.</string>
+</resources>
