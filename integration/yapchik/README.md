@@ -88,9 +88,11 @@ Vela's window theme is a framework theme, so Yapchik grows the bar by its nav gu
 labels above an on-screen navigation bar. The Softkeys page's "Navigation bar space" setting
 (`runtime/NavBarSpace*.kt`, stored in `vela_settings`) drives the public `Yapchik.navGuardDp`: Off sets 0, On reserves
 the declared navigation bar height, and Automatic (the default) keeps Yapchik's estimate only
-when the phone has an on-screen navigation bar. On Android 11 and later that is the system's
-navigation bar size ignoring visibility; earlier, a declared bar on a phone that is not
-keypad-first. The choice is reapplied on every host composition.
+when the phone has an on-screen navigation bar. A phone without a touchscreen never has one:
+its reported navigation bar is the ROM's softkey label strip, which the softkey bar hides and
+replaces. On a touch phone, Android 11 and later report the navigation bar's size ignoring
+visibility; earlier versions report a declared bar. A ROM whose strip stays visible after the
+hide needs On. The choice is reapplied on every host composition.
 
 Backups and device transfers carry Yapchik's own `yapchik.xml` preferences (mode, key
 layout, calibrated keys) beside `vela_settings.xml`: the build adds it to every section of

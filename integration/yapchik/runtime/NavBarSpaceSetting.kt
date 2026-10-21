@@ -2,6 +2,8 @@ package app.vela.yapchik
 
 import android.app.Activity
 import android.content.Context
+import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Build
 import android.view.WindowInsets
 import com.theonionsarewatching.yapchik.Yapchik
@@ -33,16 +35,20 @@ object NavBarSpaceSetting {
     }
 
     /**
-     * Android 11 and later report the navigation bar's size even while the softkey bar hides it.
-     * Earlier versions only declare whether a navigation bar exists; a keypad phone's ROM often
-     * declares one it never draws, so a declared bar counts only on a touch-first phone.
+     * An on-screen navigation bar is a touch control. Without a touchscreen, what Android reports
+     * as a navigation bar is the ROM's softkey label strip, which the softkey bar hides and
+     * replaces. On a touch phone, Android 11 and later report the navigation bar's size even while
+     * the softkey bar hides it; earlier versions only declare whether one exists.
      */
     private fun hasOnScreenNavigation(activity: Activity): Boolean {
+        val touch = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN) &&
+            activity.resources.configuration.touchscreen != Configuration.TOUCHSCREEN_NOTOUCH
+        if (!touch) return false
         val insets = activity.window?.peekDecorView()?.rootWindowInsets
         if (insets != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
             return insets.getInsetsIgnoringVisibility(WindowInsets.Type.navigationBars()).bottom > 0
         val resources = activity.resources
         val showId = resources.getIdentifier("config_showNavigationBar", "bool", "android")
-        return showId != 0 && resources.getBoolean(showId) && !Yapchik.autoDetector(activity)
+        return showId != 0 && resources.getBoolean(showId)
     }
 }

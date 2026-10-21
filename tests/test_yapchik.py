@@ -284,6 +284,13 @@ import androidx.compose.runtime.Composable
         source = (INTEGRATION / 'runtime/NavBarSpaceSetting.kt').read_text(encoding='utf-8')
         self.assertIn('private const val FILE = "vela_settings"', source)
 
+    def test_automatic_navigation_bar_space_ignores_touchless_softkey_strips(self):
+        source = (INTEGRATION / 'runtime/NavBarSpaceSetting.kt').read_text(encoding='utf-8')
+        detection = source[source.index('private fun hasOnScreenNavigation('):]
+        self.assertIn('PackageManager.FEATURE_TOUCHSCREEN', detection)
+        self.assertIn('Configuration.TOUCHSCREEN_NOTOUCH', detection)
+        self.assertLess(detection.index('if (!touch) return false'), detection.index('getInsetsIgnoringVisibility'))
+
     def test_navigation_bar_space_setting_defaults_to_automatic_and_is_applied(self):
         settings = (INTEGRATION / 'settings/YapchikSettings.kt').read_text(encoding='utf-8')
         runtime = (INTEGRATION / 'runtime/YapchikRuntime.kt').read_text(encoding='utf-8')
