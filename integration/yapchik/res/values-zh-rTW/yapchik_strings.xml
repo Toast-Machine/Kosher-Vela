@@ -18,6 +18,6 @@
     <string name="yapchik_search">搜尋</string>
     <string name="yapchik_no_actions">沒有可用的操作</string>
     <string name="yapchik_nav_space">導覽列空間</string>
-    <string name="yapchik_nav_space_auto">自動（螢幕上有導覽列時）</string>
+    <string name="yapchik_nav_space_auto">自動（導覽列顯示時）</string>
     <string name="yapchik_nav_space_hint">加高軟鍵列，讓標籤保持在螢幕導覽列上方。</string>
 </resources>

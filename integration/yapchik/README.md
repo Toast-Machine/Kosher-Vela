@@ -68,11 +68,12 @@ descendant semantics, and fallback labels are not duplicated on their icons.
 
 Options is constrained to half the available width and three quarters of the height,
 anchored at the bottom-start above system insets. The list scrolls and follows D-pad
-focus. Icons and toggles keep their full size; a row is as tall as its tallest
-full-size part, and its labels take the largest text size whose lines, wrapped only
-at legal line breaks, fit that height. A long label therefore shrinks until a second
-line fits, then wraps. Labels are never truncated; only a row whose icons alone exceed
-the menu width scales uniformly.
+focus. Icons and toggles keep their full size. A row's labels (a title and its
+subtitle) form one text, the subtitle dimmed, that wraps as a whole. A row is as tall
+as its tallest full-size part, and the text takes the largest size whose lines,
+wrapped only at legal line breaks, fit that height. A long label therefore shrinks
+until another line fits, then wraps. Labels are never truncated; only a row whose
+icons alone exceed the menu width scales uniformly.
 The Softkeys entry uses the upstream Settings hub's own themed `HubRow`, inserted
 directly after Appearance through a validated PSI anchor, with the hub's return-focus
 modifier, a section title, and settings-search entries. It opens the existing
@@ -87,12 +88,12 @@ falls back to English. The calibration dialog belongs to the pinned library and 
 Vela's window theme is a framework theme, so Yapchik grows the bar by its nav guard to keep
 labels above an on-screen navigation bar. The Softkeys page's "Navigation bar space" setting
 (`runtime/NavBarSpace*.kt`, stored in `vela_settings`) drives the public `Yapchik.navGuardDp`: Off sets 0, On reserves
-the declared navigation bar height, and Automatic (the default) keeps Yapchik's estimate only
-when the phone has an on-screen navigation bar. A phone without a touchscreen never has one:
-its reported navigation bar is the ROM's softkey label strip, which the softkey bar hides and
-replaces. On a touch phone, Android 11 and later report the navigation bar's size ignoring
-visibility; earlier versions report a declared bar. A ROM whose strip stays visible after the
-hide needs On. The choice is reapplied on every host composition.
+the declared navigation bar height, and Automatic (the default) reserves exactly the
+navigation bar the system is showing right now: its bottom inset while visible, 0 while
+hidden. The softkey bar asks the system to hide the navigation bar, so where the hide works
+Automatic adds nothing; where the bar stays up, the space follows it. A window layout
+listener reapplies the choice, so it tracks the bar as it is shown and hidden. A ROM that
+keeps drawing its strip while reporting it hidden needs On.
 
 Backups and device transfers carry Yapchik's own `yapchik.xml` preferences (mode, key
 layout, calibrated keys) beside `vela_settings.xml`: the build adds it to every section of

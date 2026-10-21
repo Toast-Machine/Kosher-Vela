@@ -18,6 +18,6 @@
     <string name="yapchik_search">Suche</string>
     <string name="yapchik_no_actions">Keine Aktionen verfügbar</string>
     <string name="yapchik_nav_space">Platz für Navigationsleiste</string>
-    <string name="yapchik_nav_space_auto">Automatisch (bei Navigationsleiste auf dem Bildschirm)</string>
+    <string name="yapchik_nav_space_auto">Automatisch (wenn die Navigationsleiste angezeigt wird)</string>
     <string name="yapchik_nav_space_hint">Macht die Softkey-Leiste höher, damit ihre Beschriftungen über der Navigationsleiste auf dem Bildschirm bleiben.</string>
 </resources>

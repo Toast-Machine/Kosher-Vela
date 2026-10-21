@@ -252,9 +252,11 @@ import androidx.compose.runtime.Composable
         self.assertNotIn('ScaleToMenuWidth', source)
         menu_entry = source[source.index('private fun MenuEntry('):source.index('private fun applyBarTheme(')]
         self.assertIn('subcompose(index) { fixed(visual) }.firstOrNull()?.let {\n                fixedParts[index] = it.measure(Constraints())', menu_entry)
-        self.assertIn('segments[i] * scale <= widths[i]', menu_entry)
+        self.assertIn('segment * scale <= width', menu_entry)
         self.assertIn('.size.height <= height', menu_entry)
-        self.assertIn('Text(label.second, style = textStyle)', menu_entry)
+        self.assertIn('subcompose("label") { Text(text, style = textStyle) }', menu_entry)
+        self.assertEqual(1, menu_entry.count('Text(text'))
+        self.assertIn('withStyle(SpanStyle(color = secondary)) { append(label) }', menu_entry)
         self.assertIn('menuContentScale(rowWidth, constraints.maxWidth)', menu_entry)
         self.assertIn('part.placeRelativeWithLayer', menu_entry)
 
@@ -284,12 +286,14 @@ import androidx.compose.runtime.Composable
         source = (INTEGRATION / 'runtime/NavBarSpaceSetting.kt').read_text(encoding='utf-8')
         self.assertIn('private const val FILE = "vela_settings"', source)
 
-    def test_automatic_navigation_bar_space_ignores_touchless_softkey_strips(self):
+    def test_automatic_navigation_bar_space_follows_the_bar_showing_now(self):
         source = (INTEGRATION / 'runtime/NavBarSpaceSetting.kt').read_text(encoding='utf-8')
-        detection = source[source.index('private fun hasOnScreenNavigation('):]
-        self.assertIn('PackageManager.FEATURE_TOUCHSCREEN', detection)
-        self.assertIn('Configuration.TOUCHSCREEN_NOTOUCH', detection)
-        self.assertLess(detection.index('if (!touch) return false'), detection.index('getInsetsIgnoringVisibility'))
+        runtime = (INTEGRATION / 'runtime/YapchikRuntime.kt').read_text(encoding='utf-8')
+        detection = source[source.index('private fun showingNavigationBarPx('):]
+        self.assertIn('if (insets.isVisible(type)) insets.getInsets(type).bottom else 0', detection)
+        self.assertNotIn('IgnoringVisibility', source)
+        self.assertIn('OnGlobalLayoutListener { NavBarSpaceSetting.apply(activity) }', runtime)
+        self.assertIn('removeOnGlobalLayoutListener(listener)', runtime)
 
     def test_navigation_bar_space_setting_defaults_to_automatic_and_is_applied(self):
         settings = (INTEGRATION / 'settings/YapchikSettings.kt').read_text(encoding='utf-8')

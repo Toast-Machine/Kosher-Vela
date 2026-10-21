@@ -18,6 +18,6 @@
     <string name="yapchik_search">Ara</string>
     <string name="yapchik_no_actions">Kullanılabilir işlem yok</string>
     <string name="yapchik_nav_space">Gezinme çubuğu boşluğu</string>
-    <string name="yapchik_nav_space_auto">Otomatik (ekranda gezinme çubuğu varsa)</string>
+    <string name="yapchik_nav_space_auto">Otomatik (gezinme çubuğu görünürken)</string>
     <string name="yapchik_nav_space_hint">Etiketlerin ekrandaki gezinme çubuğunun üstünde kalması için seçim tuşu çubuğunu yükseltir.</string>
 </resources>

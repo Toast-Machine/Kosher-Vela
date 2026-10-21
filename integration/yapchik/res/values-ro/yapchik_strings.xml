@@ -18,6 +18,6 @@
     <string name="yapchik_search">Căutare</string>
     <string name="yapchik_no_actions">Nicio acțiune disponibilă</string>
     <string name="yapchik_nav_space">Spațiu pentru bara de navigare</string>
-    <string name="yapchik_nav_space_auto">Automat (când există bară de navigare pe ecran)</string>
+    <string name="yapchik_nav_space_auto">Automat (cât timp bara de navigare este afișată)</string>
     <string name="yapchik_nav_space_hint">Face bara tastelor mai înaltă, ca etichetele să rămână deasupra barei de navigare de pe ecran.</string>
 </resources>

@@ -10,12 +10,12 @@ enum class NavBarSpace {
 }
 
 /**
- * The Yapchik nav-guard height (dp) for [choice]. null keeps Yapchik's own estimate of the
- * navigation bar height, 0 adds no space, and ON reserves the declared navigation bar height
- * even when the system currently reports no bar.
+ * The Yapchik nav-guard height (dp) for [choice]. AUTO matches the navigation bar the system is
+ * showing right now (0 while it is hidden), OFF adds no space, and ON reserves the declared
+ * navigation bar height even while the system reports the bar hidden.
  */
-internal fun navGuardDp(choice: NavBarSpace, onScreenNavigation: Boolean, navigationBarDp: Int): Int? = when (choice) {
-    NavBarSpace.AUTO -> if (onScreenNavigation) null else 0
+internal fun navGuardDp(choice: NavBarSpace, showingNavigationBarDp: Int, navigationBarDp: Int): Int = when (choice) {
+    NavBarSpace.AUTO -> showingNavigationBarDp
     NavBarSpace.OFF -> 0
     NavBarSpace.ON -> navigationBarDp
 }

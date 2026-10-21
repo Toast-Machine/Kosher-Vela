@@ -18,6 +18,6 @@
     <string name="yapchik_search">Поиск</string>
     <string name="yapchik_no_actions">Нет доступных действий</string>
     <string name="yapchik_nav_space">Место для панели навигации</string>
-    <string name="yapchik_nav_space_auto">Автоматически (если на экране есть панель навигации)</string>
+    <string name="yapchik_nav_space_auto">Автоматически (пока видна панель навигации)</string>
     <string name="yapchik_nav_space_hint">Делает панель софт-клавиш выше, чтобы подписи оставались над экранной панелью навигации.</string>
 </resources>

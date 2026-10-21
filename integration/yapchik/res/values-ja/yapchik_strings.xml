@@ -18,6 +18,6 @@
     <string name="yapchik_search">検索</string>
     <string name="yapchik_no_actions">利用できる操作はありません</string>
     <string name="yapchik_nav_space">ナビゲーションバーの余白</string>
-    <string name="yapchik_nav_space_auto">自動（画面上にナビゲーションバーがある場合）</string>
+    <string name="yapchik_nav_space_auto">自動（ナビゲーションバーの表示中）</string>
     <string name="yapchik_nav_space_hint">ラベルが画面上のナビゲーションバーに隠れないよう、ソフトキーバーを高くします。</string>
 </resources>

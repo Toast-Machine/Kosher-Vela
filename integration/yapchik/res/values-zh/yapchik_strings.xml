@@ -18,6 +18,6 @@
     <string name="yapchik_search">搜索</string>
     <string name="yapchik_no_actions">没有可用的操作</string>
     <string name="yapchik_nav_space">导航栏空间</string>
-    <string name="yapchik_nav_space_auto">自动（屏幕上有导航栏时）</string>
+    <string name="yapchik_nav_space_auto">自动（导航栏显示时）</string>
     <string name="yapchik_nav_space_hint">加高软键栏，使其标签保持在屏幕导航栏上方。</string>
 </resources>

@@ -18,6 +18,6 @@
     <string name="yapchik_search">Szukaj</string>
     <string name="yapchik_no_actions">Brak dostępnych czynności</string>
     <string name="yapchik_nav_space">Miejsce na pasek nawigacji</string>
-    <string name="yapchik_nav_space_auto">Automatycznie (gdy na ekranie jest pasek nawigacji)</string>
+    <string name="yapchik_nav_space_auto">Automatycznie (gdy pasek nawigacji jest widoczny)</string>
     <string name="yapchik_nav_space_hint">Zwiększa wysokość paska klawiszy, aby jego etykiety były nad ekranowym paskiem nawigacji.</string>
 </resources>

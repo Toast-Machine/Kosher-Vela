@@ -41,14 +41,6 @@ internal fun unbreakableSegments(text: String, locale: Locale = Locale.getDefaul
     return segments
 }
 
-/** Shares [available] text width among a row's labels: their one-line widths when they all fit,
- *  otherwise in proportion to those widths. */
-internal fun labelWidths(natural: List<Int>, available: Int): List<Int> {
-    val total = natural.sumOf { it.toLong() }
-    if (total <= available) return natural
-    return natural.map { if (total <= 0) 0 else (it.toLong() * available.coerceAtLeast(0) / total).toInt() }
-}
-
 /** The largest text scale in [minScale]..1 that [fits], by bisection. Larger text never needs
  *  fewer lines, so the fitting scales form one interval starting at [minScale]. */
 internal fun largestFittingScale(minScale: Float = 0.05f, steps: Int = 12, fits: (Float) -> Boolean): Float {

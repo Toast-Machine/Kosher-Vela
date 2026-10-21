@@ -18,6 +18,6 @@
     <string name="yapchik_search">Buscar</string>
     <string name="yapchik_no_actions">No hay acciones disponibles</string>
     <string name="yapchik_nav_space">Espacio para la barra de navegación</string>
-    <string name="yapchik_nav_space_auto">Automático (si hay barra de navegación en pantalla)</string>
+    <string name="yapchik_nav_space_auto">Automático (mientras se muestra la barra de navegación)</string>
     <string name="yapchik_nav_space_hint">Hace más alta la barra de teclas para que sus etiquetas queden por encima de la barra de navegación en pantalla.</string>
 </resources>

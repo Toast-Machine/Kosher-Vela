@@ -34,14 +34,6 @@ class MenuPresentationTest {
         assertEquals(4, unbreakableSegments("保存位置", java.util.Locale.CHINESE).size)
     }
 
-    @Test fun labelsKeepNaturalWidthsUntilTheyMustShareTheRow() {
-        assertEquals(listOf(40, 60), labelWidths(listOf(40, 60), 120))
-        assertEquals(listOf(20, 30), labelWidths(listOf(40, 60), 50))
-        assertEquals(listOf(0, 0), labelWidths(listOf(40, 60), 0))
-        assertEquals(listOf(0), labelWidths(listOf(0), -5))
-        assertTrue(labelWidths(emptyList(), 100).isEmpty())
-    }
-
     @Test fun textStaysFullSizeWhenItFits() {
         var calls = 0
         assertEquals(1f, largestFittingScale { calls++; true }, 0f)

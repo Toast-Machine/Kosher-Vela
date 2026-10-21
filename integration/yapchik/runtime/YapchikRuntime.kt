@@ -37,6 +37,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -53,6 +56,7 @@ import com.theonionsarewatching.yapchik.Softkeys
 import com.theonionsarewatching.yapchik.Yapchik
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.Window
 import android.widget.TextView
 import com.theonionsarewatching.yapchik.SoftkeyBar
@@ -312,6 +316,14 @@ fun YapchikHost(content: @Composable () -> Unit) {
     val search = store.search()
     val optionsLabel = stringResource(app.vela.R.string.yapchik_options)
     val searchLabel = stringResource(app.vela.R.string.yapchik_search)
+    DisposableEffect(activity) {
+        // AUTO follows the navigation bar: showing or hiding it changes the window insets, which
+        // lays the window out again.
+        val decor = activity.window.decorView
+        val listener = ViewTreeObserver.OnGlobalLayoutListener { NavBarSpaceSetting.apply(activity) }
+        decor.viewTreeObserver.addOnGlobalLayoutListener(listener)
+        onDispose { decor.viewTreeObserver.takeIf { it.isAlive }?.removeOnGlobalLayoutListener(listener) }
+    }
     SideEffect {
         NavBarSpaceSetting.apply(activity)
         store.updateOwner(owner, ActionOwner(null, foreground, false, false))
@@ -448,16 +460,30 @@ private fun OptionsMenu(store: ActionStore<ActionVisual>, handler: MutableState<
 }
 
 /**
- * One Options row. Icons and toggles keep their full size; the labels share the remaining width.
+ * One Options row. Icons and toggles keep their full size; the row's labels (a title and its
+ * subtitle) become one text, the subtitle dimmed, that wraps as a whole in the remaining width.
  * The row is as tall as its tallest full-size part (a one-line full-size label counts), and the
- * labels take the largest common text scale whose word-wrapped lines fit that height: a label
- * shrinks only until a second line fits, then wraps instead of shrinking further. Only when the
- * full-size icons alone are wider than the menu does the whole row scale down uniformly.
+ * text takes the largest scale whose word-wrapped lines fit that height: it shrinks only until
+ * another line fits, then wraps instead of shrinking further. Only when the full-size icons alone
+ * are wider than the menu does the whole row scale down uniformly.
  */
 @Composable
 private fun MenuEntry(visuals: List<ActionVisual>, fixed: @Composable (ActionVisual) -> Unit) {
     val measurer = rememberTextMeasurer()
     val base = LocalTextStyle.current.let { if (it.fontSize.isSpecified) it else it.copy(fontSize = 14.sp) }
+    val secondary = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = LocalContentColor.current.alpha)
+    val labels = visuals.mapNotNull { (it as? ActionVisual.Label)?.text?.takeIf { it.isNotBlank() } }
+    val text = remember(labels, secondary) {
+        buildAnnotatedString {
+            labels.forEachIndexed { index, label ->
+                if (index == 0) append(label) else {
+                    append(" ")
+                    withStyle(SpanStyle(color = secondary)) { append(label) }
+                }
+            }
+        }
+    }
+    val labelIndex = if (labels.isEmpty()) -1 else visuals.indexOfFirst { it is ActionVisual.Label && it.text.isNotBlank() }
     SubcomposeLayout { constraints ->
         val gap = 8.dp.roundToPx()
         val fixedParts = HashMap<Int, Placeable>()
@@ -466,33 +492,25 @@ private fun MenuEntry(visuals: List<ActionVisual>, fixed: @Composable (ActionVis
                 fixedParts[index] = it.measure(Constraints())
             }
         }
-        val labels = visuals.withIndex().mapNotNull { (index, visual) -> (visual as? ActionVisual.Label)?.let { index to it.text } }
-        val oneLine = labels.map { (_, text) -> measurer.measure(text, base, maxLines = 1, softWrap = false).size }
-        val segments = labels.map { (_, text) ->
-            unbreakableSegments(text).maxOfOrNull { measurer.measure(it, base, maxLines = 1, softWrap = false).size.width } ?: 0
-        }
-        val height = maxOf(fixedParts.values.maxOfOrNull { it.height } ?: 0, oneLine.maxOfOrNull { it.height } ?: 0)
-        val gaps = gap * (fixedParts.size + labels.size - 1).coerceAtLeast(0)
-        val available = if (constraints.hasBoundedWidth) constraints.maxWidth - fixedParts.values.sumOf { it.width } - gaps
-            else oneLine.sumOf { it.width }
-        val widths = labelWidths(oneLine.map { it.width }, available.coerceAtLeast(0))
-        fun style(scale: Float) = base.copy(
-            fontSize = base.fontSize * scale,
-            lineHeight = if (base.lineHeight.isSpecified) base.lineHeight * scale else base.lineHeight,
-        )
-        val scale = largestFittingScale { scale ->
-            val scaled = style(scale)
-            labels.indices.all { i ->
-                segments[i] * scale <= widths[i] &&
-                    measurer.measure(labels[i].second, scaled, constraints = Constraints(maxWidth = widths[i])).size.height <= height
+        val label = if (labelIndex < 0) null else {
+            val oneLine = measurer.measure(text, base, maxLines = 1, softWrap = false).size
+            val segment = unbreakableSegments(text.text)
+                .maxOfOrNull { measurer.measure(it, base, maxLines = 1, softWrap = false).size.width } ?: 0
+            val height = maxOf(fixedParts.values.maxOfOrNull { it.height } ?: 0, oneLine.height)
+            val width = if (!constraints.hasBoundedWidth) oneLine.width
+                else (constraints.maxWidth - fixedParts.values.sumOf { it.width } - gap * fixedParts.size).coerceAtLeast(0)
+            fun style(scale: Float) = base.copy(
+                fontSize = base.fontSize * scale,
+                lineHeight = if (base.lineHeight.isSpecified) base.lineHeight * scale else base.lineHeight,
+            )
+            val scale = largestFittingScale { scale ->
+                segment * scale <= width &&
+                    measurer.measure(text, style(scale), constraints = Constraints(maxWidth = width)).size.height <= height
             }
+            val textStyle = style(scale)
+            subcompose("label") { Text(text, style = textStyle) }.first().measure(Constraints(maxWidth = width))
         }
-        val textStyle = style(scale)
-        val labelParts = labels.withIndex().associate { (i, label) ->
-            label.first to subcompose(label.first) { Text(label.second, style = textStyle) }.first()
-                .measure(Constraints(maxWidth = widths[i]))
-        }
-        val parts = visuals.indices.mapNotNull { fixedParts[it] ?: labelParts[it] }
+        val parts = visuals.indices.mapNotNull { if (it == labelIndex) label else fixedParts[it] }
         val rowWidth = parts.sumOf { it.width } + gap * (parts.size - 1).coerceAtLeast(0)
         val rowHeight = parts.maxOfOrNull { it.height } ?: 0
         val shrink = if (constraints.hasBoundedWidth) menuContentScale(rowWidth, constraints.maxWidth) else 1f

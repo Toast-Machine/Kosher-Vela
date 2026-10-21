@@ -18,6 +18,6 @@
     <string name="yapchik_search">Sök</string>
     <string name="yapchik_no_actions">Inga åtgärder tillgängliga</string>
     <string name="yapchik_nav_space">Utrymme för navigeringsfält</string>
-    <string name="yapchik_nav_space_auto">Automatiskt (när det finns ett navigeringsfält på skärmen)</string>
+    <string name="yapchik_nav_space_auto">Automatiskt (när navigeringsfältet visas)</string>
     <string name="yapchik_nav_space_hint">Gör valknappsfältet högre så att etiketterna hamnar ovanför navigeringsfältet på skärmen.</string>
 </resources>

@@ -18,6 +18,6 @@
     <string name="yapchik_search">Keresés</string>
     <string name="yapchik_no_actions">Nincs elérhető művelet</string>
     <string name="yapchik_nav_space">Hely a navigációs sávnak</string>
-    <string name="yapchik_nav_space_auto">Automatikus (ha van navigációs sáv a képernyőn)</string>
+    <string name="yapchik_nav_space_auto">Automatikus (amíg a navigációs sáv látható)</string>
     <string name="yapchik_nav_space_hint">Magasabbá teszi a választógomb-sávot, hogy a feliratai a képernyőn lévő navigációs sáv fölött maradjanak.</string>
 </resources>

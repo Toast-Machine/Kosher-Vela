@@ -18,6 +18,6 @@
     <string name="yapchik_search">Zoeken</string>
     <string name="yapchik_no_actions">Geen acties beschikbaar</string>
     <string name="yapchik_nav_space">Ruimte voor navigatiebalk</string>
-    <string name="yapchik_nav_space_auto">Automatisch (als er een navigatiebalk op het scherm is)</string>
+    <string name="yapchik_nav_space_auto">Automatisch (zolang de navigatiebalk zichtbaar is)</string>
     <string name="yapchik_nav_space_hint">Maakt de softkeybalk hoger zodat de labels boven de navigatiebalk op het scherm blijven.</string>
 </resources>

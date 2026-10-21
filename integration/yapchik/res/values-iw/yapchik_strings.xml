@@ -18,6 +18,6 @@
     <string name="yapchik_search">חיפוש</string>
     <string name="yapchik_no_actions">אין פעולות זמינות</string>
     <string name="yapchik_nav_space">מקום לסרגל הניווט</string>
-    <string name="yapchik_nav_space_auto">אוטומטי (כשיש סרגל ניווט על המסך)</string>
+    <string name="yapchik_nav_space_auto">אוטומטי (כשסרגל הניווט מוצג)</string>
     <string name="yapchik_nav_space_hint">מגביה את סרגל המקשים הרכים כדי שהתוויות שלו יישארו מעל סרגל הניווט שעל המסך.</string>
 </resources>

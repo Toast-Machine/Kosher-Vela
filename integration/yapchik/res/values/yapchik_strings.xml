@@ -18,6 +18,6 @@
     <string name="yapchik_search">Search</string>
     <string name="yapchik_no_actions">No actions available</string>
     <string name="yapchik_nav_space">Navigation bar space</string>
-    <string name="yapchik_nav_space_auto">Automatic (when there is an on-screen navigation bar)</string>
+    <string name="yapchik_nav_space_auto">Automatic (while the navigation bar is showing)</string>
     <string name="yapchik_nav_space_hint">Makes the softkey bar taller so its labels stay above the phone\'s on-screen navigation bar.</string>
 </resources>

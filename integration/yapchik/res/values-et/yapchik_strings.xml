@@ -18,6 +18,6 @@
     <string name="yapchik_search">Otsing</string>
     <string name="yapchik_no_actions">Toiminguid pole saadaval</string>
     <string name="yapchik_nav_space">Navigeerimisriba ruum</string>
-    <string name="yapchik_nav_space_auto">Automaatne (kui ekraanil on navigeerimisriba)</string>
+    <string name="yapchik_nav_space_auto">Automaatne (kui navigeerimisriba on nähtaval)</string>
     <string name="yapchik_nav_space_hint">Teeb valikuklahvide riba kõrgemaks, et selle sildid jääksid ekraanil oleva navigeerimisriba kohale.</string>
 </resources>
