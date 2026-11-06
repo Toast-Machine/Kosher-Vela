@@ -308,6 +308,12 @@
       "source_sha": "02f20af80b25c9b601d15218596ae3a5157c2293",
       "build_fingerprint": "2b3527381eff148f4f691491a947b0637044e934b9a52fd3efcca4d0a07379f3",
       "metadata_fingerprint": "c6bb37cac4f3a8751a355f97c89e98106af322599f2b076b037296ab7dc2e7c6"
+    },
+    "436809960": {
+      "tag": "v0.5.2718",
+      "source_sha": "6050fb2823a8509323f72a9107e7036165d2dfd1",
+      "build_fingerprint": "15cfbecadab9c82efa09887ffa7e0d3f2767b12707035ff15fc1a2e527c732f9",
+      "metadata_fingerprint": "b861eeaa3e7596881cce25ba2ca51075b248b86d2fe0770e95b566633b557f61"
     }
   },
   "failed": {}
