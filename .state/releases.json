@@ -416,6 +416,12 @@
       "source_sha": "4f5fe8eaf99e92dc41d2aaba6825797c86edb981",
       "build_fingerprint": "e5c8dd5bf95ea1b9754ea9e7152d7a705131a75defa621077f2c86389fcfa5c0",
       "metadata_fingerprint": "032e955e69bab48c59a4f44d2a30ed1ff1576e4ea2312e2547df01b2d74e7a85"
+    },
+    "451883431": {
+      "tag": "v0.5.2842",
+      "source_sha": "375dd6ee2394c60c662593e1d7b6a4b2b8550704",
+      "build_fingerprint": "8632c4ab32e9e528d82f3e5a6b15aef574fdf27573dc207524ee3235df199c5c",
+      "metadata_fingerprint": "44da40911b4bb51f1ca1c024c2d9e4785a99fa3c4b59f1f5c5029458ae59c52e"
     }
   },
   "failed": {
@@ -468,7 +474,7 @@
       "build_fingerprint": "fb16da1c9f57797c1e98ccdcb1d204fed62ccc640fdfa5e694e1ea0d8ac7155f",
       "metadata_fingerprint": "42fc8ebfac814247f64ccfd1ed5e99b0a9e9df50b1d5e856295a4e58ce563bde",
       "kind": "build",
-      "retry_at": "2026-11-19T18:27:57.607334+00:00"
+      "retry_at": "2026-11-20T02:52:56.867717+00:00"
     }
   }
 }
