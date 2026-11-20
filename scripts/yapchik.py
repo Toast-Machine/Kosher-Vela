@@ -78,6 +78,28 @@ def ui_composables(files):
     return {symbol for symbol, overloads in candidates.items() if all(overloads)}
 
 
+def search_touch_branch(source, calls, searches):
+    if len(searches) != 2:
+        return None
+    dpad, touch = sorted(searches, key=lambda call: call["full"][0])
+    if any(not re.fullmatch(r"\{\s*fieldArmed\s*=\s*true\s*\}", text(source, call["lambdas"][-1]["span"]))
+           for call in (dpad, touch)):
+        return None
+    # Android 8 touch and D-pad activate the same field in mutually exclusive branches.
+    for call in calls:
+        if call["callee"] != "then":
+            continue
+        branches = argument(call, "other", 0)
+        if not branches or not all(contains(branches, action["full"]) for action in (dpad, touch)):
+            continue
+        opening = source[branches[0]:dpad["full"][0]]
+        between = source[dpad["full"][1]:touch["full"][0]]
+        if (re.fullmatch(rb"if\s*\(dpadMode\)\s*\{\s*", opening)
+                and re.search(rb"\}\s*else if\s*\(armFirst\)\s*\{(?:\s|//[^\n]*)*\Z", between)):
+            return dpad, touch
+    return None
+
+
 def edits_for_file(file, composables=None):
     path = Path(file["path"])
     source = path.read_bytes().replace(b"\r\n", b"\n")
@@ -88,6 +110,17 @@ def edits_for_file(file, composables=None):
     if composables is None:
         composables = ui_composables([file])
     actions = []
+    searches = []
+    touch_branch = None
+    if path.name == "SearchBar.kt":
+        searches = [call for call in calls
+                    if call["callee"] == "clickable"
+                    and functions.get(tuple(call["function"] or []), {}).get("name") == "SearchBar"
+                    and any("fieldArmed = true" in text(source, callback["span"])
+                            for callback in call["lambdas"])]
+        touch_branch = search_touch_branch(source, calls, searches)
+        if len(searches) != 1 and touch_branch is None:
+            report["unsupported"].append({"file": path.name, "reason": "Search activation adapter changed; review right-softkey ownership"})
 
     def record(category, call, reason):
         report[category].append({"file": path.name, "line": call["line"], "symbol": call["callee"], "reason": reason})
@@ -139,7 +172,12 @@ def edits_for_file(file, composables=None):
                 record("unsupported", call, "Modifier activation is not owned by a supported composable control")
                 continue
             target = min(candidates, key=lambda outer: outer["full"][1] - outer["full"][0])
-        if any(previous["full"] == target["full"] for previous_call, previous in actions):
+        owner = next((previous_call for previous_call, previous in actions if previous["full"] == target["full"]), None)
+        shared_search = touch_branch == (owner, call)
+        if touch_branch and call == touch_branch[1] and not shared_search:
+            record("unsupported", call, "Search activations must share the same control")
+            continue
+        if owner is not None and not shared_search:
             record("unsupported", call, "Multiple activations share one control; presentation ownership requires adapter review")
             continue
         enabled_position = (3 if name in TOGGLES | {"RadioButton", "DropdownMenuItem", "AssistChip", "ElevatedAssistChip", "SuggestionChip", "ElevatedSuggestionChip"}
@@ -149,8 +187,8 @@ def edits_for_file(file, composables=None):
         enabled = argument(call, "enabled", enabled_position)
         source_id = file["package"] + "." + path.stem
         source_id += ":" + str(call["line"]) + ":" + str(call["span"][0])
-        variable = "yapchikAction" + str(call["span"][0])
-        search = path.name == "SearchBar.kt" and function and function["name"] == "SearchBar" and is_modifier and "fieldArmed = true" in text(source, handler)
+        variable = "yapchikAction" + str((owner if shared_search else call)["span"][0])
+        search = call in searches
         before = RUNTIME + f'YapchikAction({json.dumps(source_id)}, null'
         if search:
             before += ", search = true"
@@ -183,7 +221,8 @@ def edits_for_file(file, composables=None):
                 edits[replacement_index] = (*handler, "")
             else:
                 edits[replacement_index] = (*handler, "(" + parameter_name + " = " + replacement + ")")
-        wrap(target["full"], before, " }")
+        if not shared_search:
+            wrap(target["full"], before, " }")
         if is_modifier:
             insert([call["full"][1], call["full"][1]], f".then({variable}.modifier)")
         else:
@@ -198,7 +237,8 @@ def edits_for_file(file, composables=None):
             else:
                 record("unsupported", call, "Button argument list is unavailable")
                 continue
-        actions.append((call, target))
+        if not shared_search:
+            actions.append((call, target))
         record("instrumented", call, "Live action reference; original callback and presentation retained")
 
     if file["package"] == "app.vela.ui.map" and path.name == "MapScreen.kt":
@@ -310,11 +350,6 @@ def edits_for_file(file, composables=None):
             report["unsupported"].append({"file": path.name, "reason": "Main activity root changed"})
         else:
             wrap(roots[0]["full"], RUNTIME + "YapchikHost { ", " }")
-    if path.name == "SearchBar.kt":
-        searches = [call for call in calls if call["callee"] == "clickable" and
-                    any("fieldArmed = true" in text(source, callback["span"]) for callback in call["lambdas"])]
-        if len(searches) != 1:
-            report["unsupported"].append({"file": path.name, "reason": "Search activation adapter changed; review right-softkey ownership"})
     if path.name == "VelaRoot.kt":
         for call in calls:
             if call["callee"] == "MapScreen":

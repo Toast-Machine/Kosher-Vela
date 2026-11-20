@@ -323,6 +323,38 @@ import androidx.compose.runtime.Composable
         source, report = edits_for_file(self.syntax["value_composables"], set())
         self.assertNotIn(b'YapchikItem', source)
 
+    def test_search_activation_branches_share_one_softkey_action(self):
+        source = '''package app.vela.ui.search
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+@Composable fun SearchBar(dpadMode: Boolean, armFirst: Boolean) {
+    var fieldArmed = false
+    Box(Modifier.then(
+        if (dpadMode) {
+            Modifier.clickable { fieldArmed = true }
+        } else if (armFirst) {
+            Modifier.clickable(indication = null) { fieldArmed = true }
+        } else {
+            Modifier
+        }
+    ))
+}
+'''
+        path = Path(self.directory.name) / 'SearchBar.kt'
+        path.write_text(source, encoding='utf-8')
+        report = instrument([path], Path(self.directory.name) / 'search-coverage.json')
+        transformed = path.read_text(encoding='utf-8')
+        self.assertEqual(2, len(report['instrumented']))
+        self.assertEqual(1, transformed.count('YapchikAction('))
+        self.assertEqual(1, transformed.count('search = true'))
+        self.assertEqual(2, transformed.count('.bind({ fieldArmed = true })'))
+
+        path.write_text(source.replace('else if (armFirst)', 'else if (!armFirst)'), encoding='utf-8')
+        _, coverage = edits_for_file(parse([path])[0])
+        self.assertTrue(coverage['unsupported'])
+
     def test_multiple_activations_on_one_control_fail_for_review(self):
         source = self.fixtures["modifier"].replace('import androidx.compose.foundation.clickable',
             'import androidx.compose.foundation.clickable\nimport androidx.compose.foundation.combinedClickable')
