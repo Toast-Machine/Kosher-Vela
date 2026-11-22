@@ -482,6 +482,18 @@
       "source_sha": "09216989ea26222f267fddcdb639f34e7086d49f",
       "build_fingerprint": "539ecb44bf686dcf21688f3d8541a90b88717a00e1b5d252e6223e31ba4d403b",
       "metadata_fingerprint": "7b8c37fa993d6d858bd49c2fc6b6a31bca06c4e56acb49ee2e933234a31fbecf"
+    },
+    "454642286": {
+      "tag": "v0.5.2902",
+      "source_sha": "91f1da8328fa2f93319cbfe3537adc841f112833",
+      "build_fingerprint": "1e77ba01c364cd6237f201a2e845c51d58b551cb9cf506d222d6695b10aface6",
+      "metadata_fingerprint": "17ad60d9bb75a0cadcd0bf9c9802db8f6d4521e3a3093f63e82b6b4239868c88"
+    },
+    "454640604": {
+      "tag": "canary",
+      "source_sha": "ba56b209ea3616d2eaa5c807761179730f33f2e0",
+      "build_fingerprint": "7b7e8132720d7352c72319e1f6ac781bfcd3d974ac845d9bbdccc5b29e2c6836",
+      "metadata_fingerprint": "843fe14de6158c3038f3685bd5b8db78d565552218b1b9dc255ded375c5081ee"
     }
   },
   "failed": {}
